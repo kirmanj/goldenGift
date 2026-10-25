@@ -1,0 +1,741 @@
+{
+ "_doc": "Shared by mobile/test/core/promo_rules_test.dart and functions/test (promoRules.ts). Amounts in IQD. now / expiresAt are ISO-8601 UTC.",
+ "cases": [
+  {
+   "name": "percent of the whole cart",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "discount": 10000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "percent floors to whole IQD",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 15,
+    "isActive": true,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 33333
+    }
+   ],
+   "expected": {
+    "discount": 4999
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "percent capped by maxDiscount",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 50,
+    "isActive": true,
+    "perUserLimit": 1,
+    "maxDiscount": 20000
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "discount": 20000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "percent over 100 is treated as 100",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 150,
+    "isActive": true,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 40000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "fixed amount",
+   "promo": {
+    "code": "GOLD10",
+    "type": "fixed",
+    "value": 7500,
+    "isActive": true,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 7500
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "fixed never exceeds the eligible subtotal",
+   "promo": {
+    "code": "GOLD10",
+    "type": "fixed",
+    "value": 50000,
+    "isActive": true,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 40000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "category restriction: only matching lines count",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "categoryIds": [
+     "frames"
+    ]
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "discount": 6000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "store restriction",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "storeIds": [
+     "s1"
+    ]
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "discount": 4000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "category AND store restriction",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "categoryIds": [
+     "mugs"
+    ],
+    "storeIds": [
+     "s2"
+    ]
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "rejection": "notApplicable"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "no matching line",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "categoryIds": [
+     "flowers"
+    ]
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "rejection": "notApplicable"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "minOrder uses the whole cart subtotal",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "minOrder": 100000,
+    "categoryIds": [
+     "mugs"
+    ]
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "discount": 4000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "below minOrder",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "minOrder": 100001
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    },
+    {
+     "productId": "p2",
+     "storeId": "s2",
+     "categoryIds": [
+      "frames"
+     ],
+     "lineTotal": 60000
+    }
+   ],
+   "expected": {
+    "rejection": "minOrder"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "inactive",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": false,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "inactive"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "zero value is inactive",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 0,
+    "isActive": true,
+    "perUserLimit": 1
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "inactive"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "expired exactly now",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "expiresAt": "2026-10-21T12:00:00.000Z"
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "expired"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "expires later today",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "expiresAt": "2026-10-21T20:59:59.000Z"
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 4000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "global usage limit reached",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "usageLimit": 100,
+    "usageCount": 100
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "usageLimit"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "global usage limit not yet reached",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "usageLimit": 100,
+    "usageCount": 99
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 4000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "per-user limit reached",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 2
+   },
+   "userUsageCount": 2,
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "perUserLimit"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userOrderCount": 0
+  },
+  {
+   "name": "per-user limit 0 = unlimited",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 0
+   },
+   "userUsageCount": 50,
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 4000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userOrderCount": 0
+  },
+  {
+   "name": "first order only, returning customer",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "firstOrderOnly": true
+   },
+   "userOrderCount": 1,
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "firstOrderOnly"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0
+  },
+  {
+   "name": "first order only, new customer",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": true,
+    "perUserLimit": 1,
+    "firstOrderOnly": true
+   },
+   "userOrderCount": 0,
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "discount": 4000
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0
+  },
+  {
+   "name": "missing code",
+   "promo": null,
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "notFound"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  },
+  {
+   "name": "checks run in order: inactive before expired",
+   "promo": {
+    "code": "GOLD10",
+    "type": "percent",
+    "value": 10,
+    "isActive": false,
+    "perUserLimit": 1,
+    "expiresAt": "2020-01-01T00:00:00.000Z"
+   },
+   "lines": [
+    {
+     "productId": "p1",
+     "storeId": "s1",
+     "categoryIds": [
+      "mugs",
+      "birthday"
+     ],
+     "lineTotal": 40000
+    }
+   ],
+   "expected": {
+    "rejection": "inactive"
+   },
+   "now": "2026-10-21T12:00:00.000Z",
+   "userUsageCount": 0,
+   "userOrderCount": 0
+  }
+ ]
+}

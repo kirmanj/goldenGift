@@ -1,0 +1,53 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/build/
+.metadata
+
+# Firebase
+.firebase/
+*-debug.log
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+
+# Symbolication / Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Firebase Functions local secrets (emulator) — never commit
+**/.secret.local
+
+# Release signing — never commit (docs/RELEASE.md). The templates
+# (mobile/android/key.properties.example) are committed.
+**/key.properties
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+*.provisionprofile
+**/play-service-account*.json

@@ -1,0 +1,839 @@
+rules_version = '2';
+
+// ── PRODUCTION RULES (SRS §6.17) ───────────────────────────────────────────
+// The rules to deploy at launch (Phase 10): point firebase.json "firestore.rules"
+// at this file (firestore.rules is the dev-mode set used until then). Emulator
+// tests: functions/test/rules/firestore*.rules.test.ts; the completeness guard
+// (functions/test/rules/rulesCoverage.test.ts) fails when a collection or
+// subcollection of FirestorePaths has no explicit match here.
+//
+// Cloud Functions, the seeder and other Admin SDK code bypass these rules.
+// Anything not matched below is denied — explicitly, by the catch-all at the end.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() { return request.auth != null; }
+    function isOwner(uid) { return isAuth() && request.auth.uid == uid; }
+    // Admin = the custom claim granted by setAdminClaim (Phase 5) AND the live
+    // admins/{uid} doc with a staff role: a revoked admin's ID token keeps the
+    // claim for up to an hour, the doc is gone at once (setAdminClaim deletes it).
+    function isAdmin() {
+      return isAuth() && request.auth.token.admin == true && staffRole(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function staffRole(path) {
+      return exists(path) && get(path).data.get('role', '') in ['super', 'ops', 'content', 'finance'];
+    }
+    // Partner account (Phase 8): custom claim `seller == storeId`, granted by
+    // reviewPartner and never together with `admin` — a seller is NOT an admin.
+    function sellerStore() { return isAuth() ? request.auth.token.get('seller', '') : ''; }
+    function isSeller() { return sellerStore() is string && sellerStore() != ''; }
+    function isSellerOf(storeId) { return isSeller() && storeId is string && storeId == sellerStore(); }
+    // The seller's store is live (a pending / suspended store's seller only reads)
+    // and still theirs — the live store doc, not only the claim.
+    function sellerStoreActive() {
+      let store = get(/databases/$(database)/documents/stores/$(sellerStore())).data;
+      return isSeller() && store.status == 'active' && store.get('ownerUid', '') == request.auth.uid;
+    }
+    // `null`, or a string of at most `max` characters.
+    function textOrNull(data, field, max) {
+      return data.get(field, null) == null || (data[field] is string && data[field].size() <= max);
+    }
+
+    // A timestamp field, if written, must be FieldValue.serverTimestamp().
+    function serverTimeOrAbsent(data, field) {
+      return !(field in data) || data[field] == request.time;
+    }
+
+    // ── users/{uid} (SRS §6.1, AUTH-3, AUTH-8) ──────────────────────────────
+    // What the app writes when it creates the doc after the first sign-in.
+    function userCreateKeys() {
+      return ['name', 'email', 'phone', 'countryCode', 'locale', 'referralCodeEntered',
+              'deviceId', 'photoUrl', 'notificationsEnabled', 'profileCompleted',
+              'createdAt', 'updatedAt'];
+    }
+    // What the app may change later (Edit Profile, Settings, Language, last seen).
+    function userUpdateKeys() {
+      return ['name', 'email', 'phone', 'countryCode', 'photoUrl', 'birthday', 'gender',
+              'city', 'locale', 'notificationsEnabled', 'profileCompleted', 'updatedAt',
+              'lastSeenAt', 'fcmTokens'];
+    }
+    // Set by onUserCreate / deleteAccount / admin only (§6.17). Listed separately
+    // so this guard survives future edits of the two lists above.
+    function userServerKeys() {
+      return ['role', 'storeIds', 'referralCode', 'referredBy', 'isBlocked', 'totalOrders',
+              'totalSpent', 'isDeleted', 'deletedAt'];
+    }
+    function validName(name) { return name is string && name.size() >= 2 && name.size() <= 50; }
+    function validCountryCode(v) { return v is string && v.matches('[+][0-9]{0,4}'); }
+    // The phone on a profile is the account's VERIFIED one (AUTH-2/4): absent / empty,
+    // or exactly the ID token's phone_number (set by verifyOtp / changePhone) — never
+    // a number typed in. Gift cards, support and Secret Santa rely on it.
+    function phoneIsVerified(data) {
+      return data.get('phone', null) == null || data.phone == ''
+        || (data.phone is string && validCountryCode(data.get('countryCode', null))
+            && request.auth.token.get('phone_number', '') == data.countryCode + data.phone);
+    }
+    // Bounded profile fields (AUTH-8): the app validates them; the rules cap what a
+    // modified client could store.
+    function validProfileFields(data) {
+      return textOrNull(data, 'email', 254)
+        && textOrNull(data, 'photoUrl', 2048)
+        && textOrNull(data, 'deviceId', 128)
+        && textOrNull(data, 'gender', 20)
+        && textOrNull(data, 'city', 64)
+        && (data.get('locale', null) == null || data.locale in ['en', 'ar', 'ckb'])
+        && (data.get('notificationsEnabled', null) == null || data.notificationsEnabled is bool)
+        && (data.get('profileCompleted', null) == null || data.profileCompleted is bool)
+        && (data.get('birthday', null) == null || data.birthday is timestamp)
+        && (data.get('lastSeenAt', null) == null || data.lastSeenAt is timestamp);
+    }
+
+    function validUserCreate() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(userCreateKeys())
+        && !data.keys().hasAny(userServerKeys())
+        && validName(data.get('name', null))
+        && validCountryCode(data.get('countryCode', null))
+        && phoneIsVerified(data)
+        && validProfileFields(data)
+        // Only the shape: unknown / own / same-device codes are rejected by
+        // onUserCreate, which notifies the user instead of failing sign-up.
+        && (data.get('referralCodeEntered', null) == null
+            || (data.referralCodeEntered is string && data.referralCodeEntered.size() == 6))
+        && serverTimeOrAbsent(data, 'createdAt')
+        && serverTimeOrAbsent(data, 'updatedAt');
+    }
+
+    // users.fcmTokens (SRS §4.5): the app only adds its own device token
+    // (arrayUnion → appended at the end) or removes tokens (arrayRemove on sign-out);
+    // at most 10 devices. Functions prune tokens FCM reports as dead.
+    function validFcmTokens(next, prev) {
+      return next is list && next.size() <= 10
+        && (prev.toSet().hasAll(next)
+            || (next.size() == prev.size() + 1
+                && next.toSet().hasAll(prev)
+                && next[next.size() - 1] is string
+                && next[next.size() - 1].size() > 0
+                && next[next.size() - 1].size() <= 4096));
+    }
+
+    function validUserUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(userUpdateKeys())
+        && !changed.hasAny(userServerKeys())
+        && (!('name' in changed) || validName(data.name))
+        && (!('countryCode' in changed) || validCountryCode(data.countryCode))
+        // A new number only through changePhone (it writes both with the Admin SDK).
+        && (!changed.hasAny(['phone', 'countryCode']) || phoneIsVerified(data))
+        && validProfileFields(data)
+        && (!('locale' in changed) || data.locale in ['en', 'ar', 'ckb'])
+        && (!('notificationsEnabled' in changed) || data.notificationsEnabled is bool)
+        && (!('fcmTokens' in changed) || validFcmTokens(data.fcmTokens, resource.data.get('fcmTokens', [])))
+        && (!('updatedAt' in changed) || data.updatedAt == request.time)
+        // An anonymized (deleted) account stays anonymized.
+        && resource.data.get('isDeleted', false) != true;
+    }
+
+    // users/{uid}/addresses/{id} (SRS §5.20): AddressModel.toMap().
+    function addressKeys() {
+      return ['label', 'name', 'phone', 'city', 'area', 'street', 'building', 'floor', 'notes',
+              'lat', 'lng', 'isDefault', 'createdAt', 'updatedAt'];
+    }
+    function textOrAbsent(data, field, max) {
+      return !(field in data) || (data[field] is string && data[field].size() <= max);
+    }
+    function numberOrNull(data, field) {
+      return data.get(field, null) == null || data[field] is number;
+    }
+    function validAddress(data) {
+      return data.keys().hasOnly(addressKeys())
+        && data.get('city', null) is string && data.city.size() > 0 && data.city.size() <= 64
+        && textOrAbsent(data, 'label', 100)
+        && textOrAbsent(data, 'name', 100)
+        && textOrAbsent(data, 'phone', 32)
+        && textOrAbsent(data, 'area', 200)
+        && textOrAbsent(data, 'street', 200)
+        && textOrAbsent(data, 'building', 100)
+        && textOrAbsent(data, 'floor', 50)
+        && textOrAbsent(data, 'notes', 600)
+        && numberOrNull(data, 'lat')
+        && numberOrNull(data, 'lng')
+        && (!('isDefault' in data) || data.isDefault is bool)
+        && serverTimeOrAbsent(data, 'createdAt')
+        && serverTimeOrAbsent(data, 'updatedAt');
+    }
+
+    // Admins read and list every profile (dashboard Users: search by phone /
+    // email / name, newest first) and its addresses — and never write one: blocking,
+    // wallets and roles go through setUserBlocked / adjustWallet / reviewPartner /
+    // setAdminClaim, which keep Auth, the audit log and the profile in step.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && validUserCreate();
+      allow update: if isOwner(uid) && validUserUpdate();
+      // Never deleted: deleteAccount anonymizes it and orders keep referencing it.
+      allow delete: if false;
+
+      match /addresses/{addressId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validAddress(request.resource.data);
+      }
+
+      // Tokenized cards are written by the payment-gateway function (Phase 9);
+      // the owner lists and removes them.
+      match /saved_cards/{cardId} {
+        allow read, delete: if isOwner(uid);
+      }
+    }
+
+    // ── wallets/{uid} (§6.11): Cloud Functions / Admin SDK write only ───────
+    // Money moves only through placeOrder, cancelOrder, onOrderStatusChange,
+    // onUserCreate, expireCredits and adjustWallet (the dashboard included), so
+    // every change has its transaction with balanceAfter / creditsAfter.
+    match /wallets/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+
+      match /transactions/{txnId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if false;
+      }
+      // One per credits top-up, with its own expiry (spent FIFO, expired by expireCredits).
+      match /credit_lots/{lotId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if false;
+      }
+    }
+
+    // ── referrals/{referredUid} (§6.12): written by onUserCreate / onOrderStatusChange ─
+    // Only the REFERRER reads them (Invite & Earn: query referrerUid == own uid —
+    // the flags are not the friend's business) and admins (list, count aggregations).
+    match /referrals/{referralId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.referrerUid == request.auth.uid);
+      allow write: if false;
+    }
+
+    // ── promo_codes/{CODE} (§6.9, §5.23) ───────────────────────────────────
+    // A signed-in customer looks up any code by id (private codes work when
+    // typed); everyone may read the public, active ones — listing only through a
+    // query on isPublic == true && isActive == true (the Promo Codes screen;
+    // guests can browse and apply). Admins read and list everything.
+    // Admin writes come from the dashboard with their admin_audit_log entry in the
+    // same batch (PromoAdminRepository, like every dashboard mutation — the rules
+    // cannot tie the two together, the entry's id being random). usageCount is
+    // placeOrder's: 0 on create, never changed by a client; a used code cannot be
+    // deleted (deactivate it instead).
+    function promoIsListed() {
+      return resource.data.isPublic == true && resource.data.isActive == true;
+    }
+    match /promo_codes/{code} {
+      allow get: if isAuth() || promoIsListed();
+      allow list: if isAdmin() || promoIsListed();
+      allow create: if isAdmin()
+        && request.resource.data.get('usageCount', -1) == 0
+        && request.resource.data.get('code', code) == code;
+      allow update: if isAdmin()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['usageCount', 'code']);
+      allow delete: if isAdmin() && resource.data.get('usageCount', 0) == 0;
+
+      // usages/{uid} = { count }: placeOrder / refunds only. The customer reads
+      // their own (the cart's per-customer limit preview).
+      match /usages/{uid} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if false;
+      }
+    }
+
+    // ── notifications/{id} (§6.13, §5.5): created by functions only ─────────
+    // (order updates, referral notices, sendBroadcast). Queries must filter
+    // userId == own uid, or userId in [own uid, 'all']; admins read everything
+    // (broadcast history).
+    match /notifications/{notificationId} {
+      allow read: if isAdmin() || (isAuth()
+        && (resource.data.userId == request.auth.uid || resource.data.userId == 'all'));
+      // "Mark as read" — one way only. Broadcasts ('all') are shared, so the app
+      // keeps their read state on the device instead.
+      allow update: if isAuth() && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'updatedAt'])
+        && request.resource.data.isRead == true
+        && (!('updatedAt' in request.resource.data.diff(resource.data).affectedKeys())
+            || request.resource.data.updatedAt == request.time);
+      // Swipe to delete (own notifications only; broadcasts are hidden on the device).
+      allow delete: if isAuth() && resource.data.userId == request.auth.uid;
+      allow create: if false;
+    }
+
+    // ── orders/{orderId} (§6.7): created only by placeOrder ─────────────────
+    // The owner reads (queries filter userId == own uid); customers never write —
+    // they cancel through cancelOrder. Admins change status exactly the way the
+    // dashboard does (AdminOrdersRepository.changeStatus): only these keys, in
+    // their own name; onOrderStatusChange then writes the timeline entry.
+    // Sellers (claim seller == storeId) read the orders that include their store
+    // (queries filter storeIds array-contains their store id) and their
+    // timelines; they move their own lines only through updateOrderItems.
+    function sellerInOrder(order) { return isSeller() && sellerStore() in order.storeIds; }
+    function orderDoc(orderId) { return get(/databases/$(database)/documents/orders/$(orderId)).data; }
+    function orderStatuses() {
+      return ['pending', 'confirmed', 'preparing', 'readyForDelivery', 'outForDelivery',
+              'delivered', 'cancelledByBuyer', 'cancelledBySeller', 'returned', 'refunded'];
+    }
+    function noteOrNull(data, field) {
+      return data.get(field, null) == null || (data[field] is string && data[field].size() <= 500);
+    }
+    function validAdminOrderUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(['status', 'statusNote', 'statusUpdatedBy', 'statusUpdatedByRole',
+                              'items', 'updatedAt', 'cancelReason'])
+        && data.status in orderStatuses()
+        && data.statusUpdatedBy == request.auth.uid
+        && data.statusUpdatedByRole == 'admin'
+        && noteOrNull(data, 'statusNote')
+        && noteOrNull(data, 'cancelReason')
+        // Lines change status, never disappear.
+        && data.items is list && data.items.size() == resource.data.items.size()
+        && (!('updatedAt' in changed) || data.updatedAt == request.time);
+    }
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid)
+        || sellerInOrder(resource.data);
+      allow update: if isAdmin() && validAdminOrderUpdate();
+      allow create, delete: if false;
+
+      // Written only by placeOrder (first entry) and onOrderStatusChange.
+      match /status_history/{entryId} {
+        allow read: if isAdmin() || (isAuth()
+          && (orderDoc(orderId).userId == request.auth.uid || sellerInOrder(orderDoc(orderId))));
+        allow write: if false;
+      }
+    }
+
+    // ── carts/{uid}/items/{itemId} (§6.5): CartItemModel.toMap() + addedAt ──
+    // Prices here are only a snapshot: placeOrder re-prices every line.
+    function cartItemKeys() {
+      return ['productId', 'storeId', 'titleSnapshot', 'titleSnapshotAr', 'titleSnapshotKu',
+              'imageSnapshot', 'unitPrice', 'qty', 'selections', 'lineTotal', 'preparationDays',
+              'addedAt'];
+    }
+    function validCartItem(data) {
+      return data.keys().hasOnly(cartItemKeys())
+        && data.get('productId', null) is string && data.productId.size() > 0 && data.productId.size() <= 128
+        && data.get('qty', null) is int && data.qty >= 1 && data.qty <= 99
+        && data.get('unitPrice', null) is int
+        && (!('storeId' in data) || (data.storeId is string && data.storeId.size() <= 128))
+        && (!('lineTotal' in data) || data.lineTotal is int)
+        && (!('preparationDays' in data) || (data.preparationDays is int && data.preparationDays >= 0))
+        && (!('selections' in data) || (data.selections is list && data.selections.size() <= 30))
+        && textOrAbsent(data, 'titleSnapshot', 300)
+        && textOrAbsent(data, 'titleSnapshotAr', 300)
+        && textOrAbsent(data, 'titleSnapshotKu', 300)
+        && (data.get('imageSnapshot', null) == null
+            || (data.imageSnapshot is string && data.imageSnapshot.size() <= 2048))
+        // A server timestamp, or the time a guest added it (merged on sign-in).
+        && (!('addedAt' in data) || data.addedAt is timestamp);
+    }
+    match /carts/{uid}/items/{itemId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validCartItem(request.resource.data);
+    }
+
+    // ── wishlists/{uid}/items/{productId} (§6.6): WishlistRepository.add ────
+    function validWishlistItem(data, productId) {
+      return data.keys().hasOnly(['listId', 'productId', 'title', 'titleAr', 'titleKu', 'image',
+                                  'price', 'addedAt'])
+        && data.get('productId', null) == productId
+        && data.get('listId', null) is string && data.listId.size() > 0 && data.listId.size() <= 64
+        && (!('price' in data) || data.price is number)
+        && textOrAbsent(data, 'title', 300)
+        && textOrAbsent(data, 'titleAr', 300)
+        && textOrAbsent(data, 'titleKu', 300)
+        && (data.get('image', null) == null || (data.image is string && data.image.size() <= 2048))
+        && (!('addedAt' in data) || data.addedAt is timestamp);
+    }
+    match /wishlists/{uid}/items/{productId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validWishlistItem(request.resource.data, productId);
+    }
+
+    // ── Catalogue: public read, admin write; sellers their own products ────
+    // Sellers (store active) create and edit products of their own store the way
+    // the dashboard's ProductsAdminRepository.save writes them (with the audit
+    // entry in the batch), but never move one to another store, feature it or
+    // touch the counters the app and functions keep; they don't delete (they
+    // deactivate).
+    function productCounterKeys() { return ['salesCount', 'viewCount', 'ratingAvg', 'ratingCount']; }
+    // giftFor (§5.8a, Phase 11): at most the three GiftAudience values. Checked
+    // when written (create, or an update that changes it); the derived forKeys
+    // are rewritten by onProductWrite whatever a client sends.
+    function validGiftFor(data) {
+      return !('giftFor' in data)
+        || (data.giftFor is list && data.giftFor.size() <= 3
+            && data.giftFor.hasOnly(['men', 'women', 'companies']));
+    }
+    function validProductUpdateGiftFor() {
+      return !('giftFor' in request.resource.data.diff(resource.data).affectedKeys())
+        || validGiftFor(request.resource.data);
+    }
+    function validSellerProductCreate() {
+      let data = request.resource.data;
+      return isSellerOf(data.get('storeId', null)) && sellerStoreActive()
+        && data.get('isFeatured', false) == false
+        && data.get('salesCount', 0) == 0 && data.get('viewCount', 0) == 0
+        && data.get('ratingAvg', 0) == 0 && data.get('ratingCount', 0) == 0;
+    }
+    function validSellerProductUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isSellerOf(resource.data.get('storeId', null)) && sellerStoreActive()
+        && !changed.hasAny(['storeId', 'isFeatured'])
+        && !changed.hasAny(productCounterKeys());
+    }
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if (isAdmin() || validSellerProductCreate()) && validGiftFor(request.resource.data);
+      allow update: if (isAdmin() || validSellerProductUpdate()) && validProductUpdateGiftFor();
+      allow delete: if isAdmin();
+
+      // ── reviews/{orderId}_{uid} (§5.26, §6.4) ──────────────────────────────
+      // The customer reviews a product of one of their DELIVERED orders (the
+      // order's productIds lists it), exactly as ReviewsRepository.submit writes it:
+      // doc id `{orderId}_{own uid}`, pending moderation (isApproved false), the
+      // product's own storeId. Re-submitting replaces it and sends it back to
+      // moderation. Admins approve / hide (ReviewsAdminRepository: isApproved +
+      // moderatedBy / moderatedAt, audit entry in the batch). onReviewWrite keeps
+      // ratingAvg / ratingCount. Reads: see the collection-group match below.
+      match /reviews/{reviewId} {
+        allow create: if isAuth() && validReview(productId, reviewId);
+        allow update: if (isAuth() && resource.data.userId == request.auth.uid && validReview(productId, reviewId))
+          || (isAdmin() && validReviewModeration());
+        allow delete: if false;
+      }
+    }
+
+    function reviewKeys() {
+      return ['productId', 'userId', 'userName', 'storeId', 'rating', 'text', 'images', 'orderId',
+              'isApproved', 'createdAt'];
+    }
+    function validReview(productId, reviewId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly(reviewKeys())
+        && data.keys().hasAll(['productId', 'userId', 'storeId', 'rating', 'orderId', 'isApproved', 'createdAt'])
+        && data.userId == request.auth.uid
+        && data.productId == productId
+        && data.orderId is string && data.orderId.size() > 0 && data.orderId.size() <= 128
+        && reviewId == data.orderId + '_' + request.auth.uid
+        && data.rating is int && data.rating >= 1 && data.rating <= 5
+        && textOrAbsent(data, 'userName', 100)
+        // The app keeps 500 characters; rules count differently, so allow some slack.
+        && textOrAbsent(data, 'text', 1000)
+        && (!('images' in data) || (data.images is list && data.images.size() <= 3))
+        && data.isApproved == false
+        && data.createdAt == request.time
+        && data.storeId == get(/databases/$(database)/documents/products/$(productId)).data.storeId
+        && reviewedOrderOk(get(/databases/$(database)/documents/orders/$(data.orderId)).data, productId);
+    }
+    // The caller's delivered order that contains the product.
+    function reviewedOrderOk(order, productId) {
+      return order.userId == request.auth.uid
+        && order.status == 'delivered'
+        && productId in order.get('productIds', []);
+    }
+    function validReviewModeration() {
+      let data = request.resource.data;
+      return data.diff(resource.data).affectedKeys().hasOnly(['isApproved', 'moderatedBy', 'moderatedAt'])
+        && data.isApproved is bool
+        && data.get('moderatedBy', null) == request.auth.uid
+        && data.get('moderatedAt', null) == request.time;
+    }
+    // Every `reviews` document, also as a collection group (the dashboard's
+    // moderation queue): approved ones for everyone — queries must filter
+    // isApproved == true — the author their own, admins all. A get of a review
+    // that does not exist is allowed (the app looks up "my review" by id).
+    match /{path=**}/reviews/{reviewId} {
+      allow read: if resource == null
+        || resource.data.isApproved == true
+        || isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+    }
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /subcategories/{subcategoryId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /gift_card_templates/{templateId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── reels/{id} (§5.27, §6.4a, Phase 11): staff publish, everyone watches ─
+    // Readable while `visible` (the reel and its product are active) — the app's
+    // feed filters `visible == true`, so a list without that filter is denied —
+    // and by admins (the dashboard lists hidden ones too). Only admins write
+    // (the dashboard saves the reel with its derived fields and the audit entry
+    // in one batch); onReelWrite / onProductWrite keep the derived fields with
+    // the Admin SDK. Sellers don't publish reels in v1 (§12 item 14).
+    match /reels/{reelId} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── gift_cards/{id} (§6.10, §5.22): issued by functions only ────────────
+    // (onGiftCardOrderPaid, adminIssueGiftCard; redeemed by redeemGiftCard). The
+    // purchaser and the recipient read (queries filter purchaserUid or
+    // recipientUid == own uid); admins read all and may only DISABLE a pending /
+    // sent card, the way GiftCardsAdminRepository.disableCard writes it.
+    function validGiftCardDisable() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(['status', 'disabledReason', 'disabledBy', 'disabledAt', 'updatedAt'])
+        && data.status == 'disabled'
+        && resource.data.status in ['pending', 'sent']
+        && data.get('disabledBy', null) == request.auth.uid
+        && data.get('disabledReason', null) is string
+        && data.disabledReason.size() >= 3 && data.disabledReason.size() <= 1000
+        && data.get('disabledAt', null) == request.time
+        && (!('updatedAt' in changed) || data.updatedAt == request.time);
+    }
+    match /gift_cards/{cardId} {
+      allow read: if isAdmin() || (isAuth()
+        && (resource.data.purchaserUid == request.auth.uid || resource.data.recipientUid == request.auth.uid));
+      allow update: if isAdmin() && validGiftCardDisable();
+      allow create, delete: if false;
+    }
+
+    // ── special_requests/{id} (§6.14, §5.17, §5.24) ─────────────────────────
+    // The customer creates their request exactly as SpecialRequestsRepository.create
+    // writes it (status submitted) and afterwards only bumps the last-message
+    // markers (sendMessage). Admins move the status, quote, assign and reply
+    // (SpecialRequestsAdminRepository, audit entry in the batch). `accepted` and
+    // `orderId` come only from acceptQuote. Texts are capped generously (the app
+    // limits graphemes; rules count characters).
+    function specialRequestStatuses() {
+      return ['submitted', 'inReview', 'quoted', 'accepted', 'rejected', 'completed'];
+    }
+    function validSpecialRequestCreate() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['userId', 'type', 'text', 'images', 'status', 'customerName',
+                                  'customerPhone', 'lastMessageAt', 'lastMessageBy', 'createdAt',
+                                  'updatedAt'])
+        && data.get('userId', null) == request.auth.uid
+        && data.get('type', null) in ['gift', 'support']
+        && data.get('text', null) is string && data.text.size() > 0 && data.text.size() <= 4000
+        && data.get('images', null) is list && data.images.size() <= 5
+        && data.get('status', null) == 'submitted'
+        && textOrNull(data, 'customerName', 100)
+        && textOrNull(data, 'customerPhone', 32)
+        && data.get('lastMessageBy', null) == 'customer'
+        && data.get('lastMessageAt', null) == request.time
+        && data.get('createdAt', null) == request.time
+        && data.get('updatedAt', null) == request.time;
+    }
+    function validCustomerRequestUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(['lastMessageAt', 'lastMessageBy', 'updatedAt'])
+        && data.get('lastMessageBy', null) == 'customer'
+        && (!('lastMessageAt' in changed) || data.lastMessageAt == request.time)
+        && (!('updatedAt' in changed) || data.updatedAt == request.time);
+    }
+    function validAdminRequestUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(['status', 'quoteAmount', 'quoteNote', 'quotedBy', 'quotedAt',
+                              'lastMessageAt', 'lastMessageBy', 'updatedAt', 'assignedAdminUid',
+                              'rejectReason'])
+        && data.status in specialRequestStatuses()
+        && (data.status != 'accepted' || resource.data.status == 'accepted')
+        && (!('quoteAmount' in changed) || data.get('quoteAmount', null) == null
+            || (data.quoteAmount is int && data.quoteAmount >= 0))
+        && (!('quoteNote' in changed) || textOrNull(data, 'quoteNote', 1000))
+        && (!('quotedBy' in changed) || data.quotedBy == request.auth.uid)
+        && (!('quotedAt' in changed) || data.quotedAt == request.time)
+        && (!('lastMessageAt' in changed) || data.lastMessageAt == request.time)
+        && (!('lastMessageBy' in changed) || data.lastMessageBy == 'admin')
+        && (!('assignedAdminUid' in changed) || (data.assignedAdminUid is string && data.assignedAdminUid.size() <= 128))
+        && (!('rejectReason' in changed) || textOrNull(data, 'rejectReason', 1000))
+        && (!('updatedAt' in changed) || data.updatedAt == request.time);
+    }
+    // special_requests/{id}/messages/{id}: {senderUid, role, text, images, at}.
+    function validRequestMessage(role) {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['senderUid', 'role', 'text', 'images', 'at'])
+        && data.get('senderUid', null) == request.auth.uid
+        && data.get('role', null) == role
+        && data.get('text', null) is string && data.text.size() > 0 && data.text.size() <= 4000
+        && data.get('images', null) is list && data.images.size() <= 5
+        && data.get('at', null) == request.time;
+    }
+    function requestOwner(requestId) {
+      return get(/databases/$(database)/documents/special_requests/$(requestId)).data.userId;
+    }
+    match /special_requests/{requestId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() && validSpecialRequestCreate();
+      allow update: if (isAuth() && resource.data.userId == request.auth.uid && validCustomerRequestUpdate())
+        || (isAdmin() && validAdminRequestUpdate());
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isAdmin() || (isAuth() && requestOwner(requestId) == request.auth.uid);
+        allow create: if (isAuth() && requestOwner(requestId) == request.auth.uid && validRequestMessage('customer'))
+          || (isAdmin() && validRequestMessage('admin'));
+        allow update, delete: if false;
+      }
+    }
+
+    // ── stores/{storeId} (§6.2, §5.25) ──────────────────────────────────────
+    // Live stores (active / suspended) are public; a pending application is
+    // visible only to its owner, its seller and admins (queries filter status ==
+    // active / suspended, or ownerUid == own uid). Stores are created, approved,
+    // rejected and suspended only by functions (submitPartnerApplication,
+    // reviewPartner, setStoreStatus). Admins edit the profile and commission, the
+    // store's seller only the profile and only while the store is active — each
+    // with its audit entry in the same batch (StoresAdminRepository.updateProfile).
+    function storeProfileKeys() {
+      return ['name', 'nameAr', 'nameKu', 'description', 'descriptionAr', 'descriptionKu',
+              'logoUrl', 'coverUrl', 'phone', 'city', 'updatedAt'];
+    }
+    function validStoreProfile(data, changed) {
+      return (!('name' in changed) || (data.get('name', null) is string && data.name.size() > 0 && data.name.size() <= 60))
+        && textOrNull(data, 'nameAr', 60)
+        && textOrNull(data, 'nameKu', 60)
+        && textOrNull(data, 'description', 1000)
+        && textOrNull(data, 'descriptionAr', 1000)
+        && textOrNull(data, 'descriptionKu', 1000)
+        && textOrNull(data, 'logoUrl', 2048)
+        && textOrNull(data, 'coverUrl', 2048)
+        && textOrNull(data, 'phone', 32)
+        && textOrNull(data, 'city', 64)
+        && (!('updatedAt' in changed) || data.updatedAt == request.time);
+    }
+    function validAdminStoreUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(storeProfileKeys().concat(['commissionPercent']))
+        && validStoreProfile(data, changed)
+        && (!('commissionPercent' in changed)
+            || (data.commissionPercent is number && data.commissionPercent >= 0 && data.commissionPercent <= 50));
+    }
+    function validSellerStoreUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(storeProfileKeys()) && validStoreProfile(data, changed);
+    }
+    match /stores/{storeId} {
+      // `resource == null`: a missing store reads as missing (the cart looks its
+      // lines' stores up by id), not as permission denied.
+      allow read: if resource == null || resource.data.status in ['active', 'suspended'] || isAdmin()
+        || isSellerOf(storeId) || (isAuth() && resource.data.ownerUid == request.auth.uid);
+      allow update: if (isAdmin() && validAdminStoreUpdate())
+        || (isSellerOf(storeId) && resource.data.status == 'active'
+            && resource.data.get('ownerUid', '') == request.auth.uid && validSellerStoreUpdate());
+      allow create, delete: if false;
+
+      // stores/{id}/private/application (+ payout details later): the owner (or a
+      // rejected application's owner — the doc carries ownerUid), the store's
+      // seller and admins read; functions write.
+      match /private/{docId=**} {
+        allow read: if isAdmin() || isSellerOf(storeId)
+          || (isAuth() && resource.data.get('ownerUid', null) == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
+    // ── secret_santa_groups/{id} (§5.16, §6.14) ────────────────────────────
+    // The organiser creates the group and their own member doc in one batch,
+    // exactly as SecretSantaRepository.create writes them (status open,
+    // memberUids == [own uid]); everyone else joins through joinSecretSanta.
+    // Members read the group and the member list; while the group is open the
+    // organiser may edit name / budget / exchange date and members' exclusions,
+    // and each member their own wish note. Assignments are written only by
+    // drawSecretSanta and each member reads ONLY their own
+    // (assignments/{own uid}). Admins read everything (dashboard monitoring:
+    // lists and count() queries).
+    function santaGroupPath(groupId) { return /databases/$(database)/documents/secret_santa_groups/$(groupId); }
+    function santaMember(group) { return isAuth() && request.auth.uid in group.get('memberUids', []); }
+    function santaGroupKeys() {
+      return ['name', 'type', 'budget', 'exchangeDate', 'organiserUid', 'status', 'inviteCode', 'memberUids',
+              'createdAt'];
+    }
+    function validSantaName(v) { return v is string && v.size() > 0 && v.size() <= 120; }
+    function validSantaBudget(v) { return v is int && v >= 0 && v <= 100000000; }
+    function validSantaGroupCreate() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(santaGroupKeys())
+        && data.keys().hasAll(santaGroupKeys())
+        && validSantaName(data.name)
+        && data.type in ['family', 'friends', 'work']
+        && validSantaBudget(data.budget)
+        && data.exchangeDate is timestamp
+        && data.organiserUid == request.auth.uid
+        && data.status == 'open'
+        && data.inviteCode is string && data.inviteCode.matches('[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}')
+        && data.memberUids == [request.auth.uid]
+        && data.createdAt == request.time;
+    }
+    function validSantaGroupUpdate() {
+      let data = request.resource.data;
+      let changed = data.diff(resource.data).affectedKeys();
+      return resource.data.organiserUid == request.auth.uid
+        && resource.data.status == 'open'
+        && changed.hasOnly(['name', 'budget', 'exchangeDate', 'updatedAt'])
+        && validSantaName(data.name)
+        && validSantaBudget(data.budget)
+        && data.exchangeDate is timestamp
+        && (!('updatedAt' in changed) || data.updatedAt == request.time);
+    }
+    // The organiser's own member doc, created in the same batch as its group.
+    function validSantaOrganiserMember(groupId) {
+      let data = request.resource.data;
+      let group = getAfter(santaGroupPath(groupId)).data;
+      return !exists(santaGroupPath(groupId))
+        && group.organiserUid == request.auth.uid
+        && group.memberUids == [request.auth.uid]
+        && data.keys().hasOnly(['name', 'phone', 'joinedAt'])
+        && validSantaName(data.get('name', null))
+        && textOrNull(data, 'phone', 32)
+        && data.get('joinedAt', null) == request.time;
+    }
+    function validWishNoteUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['wishlistNote'])
+        && textOrNull(request.resource.data, 'wishlistNote', 600);
+    }
+    function validExclusionsUpdate(groupId) {
+      let group = get(santaGroupPath(groupId)).data;
+      let data = request.resource.data;
+      return group.organiserUid == request.auth.uid
+        && group.status == 'open'
+        && data.diff(resource.data).affectedKeys().hasOnly(['exclusions'])
+        && data.exclusions is list && data.exclusions.size() <= 50;
+    }
+    match /secret_santa_groups/{groupId} {
+      allow read: if isAdmin() || (isAuth() && request.auth.uid in resource.data.memberUids);
+      allow create: if isAuth() && validSantaGroupCreate();
+      allow update: if isAuth() && validSantaGroupUpdate();
+      allow delete: if false;
+
+      match /members/{memberUid} {
+        allow read: if isAdmin() || santaMember(get(santaGroupPath(groupId)).data);
+        allow create: if isOwner(memberUid) && validSantaOrganiserMember(groupId);
+        allow update: if (isOwner(memberUid) && validWishNoteUpdate())
+          || (isAuth() && validExclusionsUpdate(groupId));
+        allow delete: if false;
+      }
+      match /assignments/{giverUid} {
+        allow read: if isAdmin() || isOwner(giverUid);
+        allow write: if false;
+      }
+    }
+
+    // ── ai_searches/{id} (§5.6): written by aiGiftSearch only ──────────────
+    // Queries hold what customers typed: no customer access; admins read
+    // (dashboard KPI "AI searches today": count() on `at`).
+    match /ai_searches/{searchId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ── payment_sessions/{id} (§6.14): createPaymentSession / zainCashReturn /
+    // expirePaymentSessions only. The customer reads their own (the app waits for
+    // `status` after the gateway page); admins read all (support).
+    match /payment_sessions/{sessionId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid);
+      allow write: if false;
+    }
+
+    // ── app_settings/{general|cities|referral|payments|search} (§6.14) ─────
+    match /app_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Admin-only collections (SRS §6.14, §9) ─────────────────────────────
+    // admins/{uid}: written only by setAdminClaim / scripts/create-admin.ts (Admin
+    // SDK), never by a client — not even a super admin, whose changes go through
+    // the function so the claim and the doc stay in step. Readable by its owner
+    // (the dashboard reads it right after sign-in) and by every admin.
+    match /admins/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+    }
+    // admin_audit_log/{id}: the dashboard appends one entry in the same batch as
+    // every change it makes (AuditLog.add). Append-only: an admin may create an
+    // entry only in their own name, stamped with the server time and holding
+    // nothing but the audit fields; nobody edits or deletes history.
+    // setAdminClaim writes its own entries with the Admin SDK. Sellers append
+    // entries too — in their own name, for their products and their store.
+    function auditEntryKeys() {
+      return ['adminUid', 'action', 'target', 'before', 'after', 'at'];
+    }
+    function validAuditEntry() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(auditEntryKeys())
+        && data.adminUid == request.auth.uid
+        && data.at == request.time
+        && data.get('action', null) is string
+        && data.get('target', null) is string;
+    }
+    // A seller's entry names its own store or one of its own products (as it is
+    // after the batch: the entry rides along with the product write it records).
+    function validSellerAuditTarget() {
+      let target = request.resource.data.get('target', '');
+      return target is string
+        && (target == 'stores/' + sellerStore()
+            || (target.matches('products/[^/]+') && sellerOwnsProductAfter(target.split('/')[1])));
+    }
+    function sellerOwnsProductAfter(productId) {
+      let path = /databases/$(database)/documents/products/$(productId);
+      return existsAfter(path) && getAfter(path).data.get('storeId', '') == sellerStore();
+    }
+    match /admin_audit_log/{entryId} {
+      allow read: if isAdmin();
+      allow create: if isAuth() && validAuditEntry() && (isAdmin() || (isSeller() && validSellerAuditTarget()));
+      allow update, delete: if false;
+    }
+    // Idempotency markers (runOnce): Cloud Functions only.
+    match /function_runs/{key} {
+      allow read, write: if false;
+    }
+    // counters/orders-{YYMM}: the monthly order-number sequence, incremented only
+    // inside the placeOrder transaction (Phase 6). No client access at all — a
+    // client that could read or bump it could guess or collide order numbers.
+    match /counters/{counterId} {
+      allow read, write: if false;
+    }
+
+    // ── Phone OTP (sendOtp / verifyOtp / changePhone): Cloud Functions only ─
+    // Hashed codes and rate-limit windows. No client — not even an admin — may
+    // read them (attempt counters and throttle state are an attacker's map) or
+    // write them (resetting a counter would lift the limit).
+    match /otp_codes/{id} {
+      allow read, write: if false;
+    }
+    match /otp_throttle/{id} {
+      allow read, write: if false;
+    }
+    // Emulator-only mirror of the PLAIN code for end-to-end tests; it never
+    // exists in production, and must never be readable if it ever did.
+    match /otp_debug/{id} {
+      allow read, write: if false;
+    }
+
+    // ── Everything else: denied ────────────────────────────────────────────
+    // Firestore denies unmatched paths anyway; this makes it explicit and is the
+    // anchor of the completeness test. Matches never combine to grant access
+    // here (an allow elsewhere still allows), so this denies nothing legitimate.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

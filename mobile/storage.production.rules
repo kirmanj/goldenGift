@@ -1,0 +1,158 @@
+rules_version = '2';
+
+// ── PRODUCTION RULES (SRS §6.16, §6.17) ────────────────────────────────────
+// The rules to deploy at launch (Phase 10): point firebase.json "storage.rules"
+// at this file (storage.rules is the dev-mode set used until then). Emulator
+// tests: functions/test/rules/storage.rules.test.ts; rulesCoverage.test.ts fails
+// when the app or the dashboard uploads to a folder without a match here.
+// The Admin SDK (Cloud Functions, deleteAccount) bypasses these rules.
+// No path is publicly writable; every write is an image (JPEG / PNG / WebP / GIF /
+// HEIC — never SVG, which can carry script) under 10 MB, except the reel videos
+// admins upload to reels/ (MP4 under 100 MB, Phase 11). Anything not matched
+// below is denied — explicitly, by the catch-all at the end.
+//
+// Download URLs (with their token) keep working for whoever holds them; these
+// rules govern SDK access (upload, list, getDownloadURL, metadata).
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuth() { return request.auth != null; }
+    function isOwner(uid) { return isAuth() && request.auth.uid == uid; }
+    // Admin = the custom claim granted by setAdminClaim AND the live admins/{uid}
+    // doc with a staff role (as in firestore.production.rules).
+    function isAdmin() {
+      return isAuth() && request.auth.token.admin == true
+        && staffRole(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+    function staffRole(path) {
+      return firestore.exists(path) && firestore.get(path).data.get('role', '') in ['super', 'ops', 'content', 'finance'];
+    }
+    // Partner account (Phase 8): custom claim `seller == storeId` (never `admin`).
+    function sellerStore() { return isAuth() ? request.auth.token.get('seller', '') : ''; }
+    function isSeller() { return sellerStore() is string && sellerStore() != ''; }
+    function isSellerOf(storeId) { return isSeller() && storeId == sellerStore(); }
+    // A seller's own product (its storeId is the seller's store), or a product id
+    // that does not exist yet: the seller is creating it, and the Firestore rules
+    // only let them create it for their own store.
+    function sellerMayWriteProduct(productId) {
+      let path = /databases/(default)/documents/products/$(productId);
+      return isSeller()
+        && (!firestore.exists(path) || firestore.get(path).data.get('storeId', '') == sellerStore());
+    }
+    // A raster image under 10 MB (SRS §8: photo uploads validated by type and size).
+    function isImageUpload() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|gif|heic|heif)')
+        && request.resource.size > 0
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+    // A reel video (§5.27, §6.16): MP4 only, under 100 MB — the only non-image upload.
+    function isReelVideoUpload() {
+      return request.resource.contentType == 'video/mp4'
+        && request.resource.size > 0
+        && request.resource.size < 100 * 1024 * 1024;
+    }
+
+    // Profile photo (§5.14). Public read so the URL works in any image widget.
+    match /users/{uid}/avatar.jpg {
+      allow read: if true;
+      allow create, update: if isOwner(uid) && isImageUpload();
+      allow delete: if isOwner(uid);
+    }
+
+    // Customer photos for photoUpload options (§5.9, §6.16):
+    // uploads/{uid}/{cartItemId}/{n}.jpg, uploaded on Add to Cart.
+    match /uploads/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && isImageUpload();
+      allow delete: if isOwner(uid);
+    }
+
+    // The order's copies (placeOrder → orders/{orderId}/{lineId}/{n}.jpg):
+    // the customer who placed the order and admins read; only functions write.
+    match /orders/{orderId}/{allPaths=**} {
+      allow read: if isAdmin()
+        || (isAuth() && firestore.get(/databases/(default)/documents/orders/$(orderId)).data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // ── Customer uploads (Phase 8 – 9): owner write (images under 10 MB), owner +
+    // admin read. The app shows them through their download URLs.
+    // special_requests/{uid}/{requestId}/{n}.jpg (§5.17)
+    match /special_requests/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && isImageUpload();
+      allow delete: if isOwner(uid);
+    }
+    // partner_applications/{uid}/{n}.jpg — Become a Partner sample photos (§5.25)
+    match /partner_applications/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && isImageUpload();
+      allow delete: if isOwner(uid);
+    }
+    // gift_cards/{uid}/{clientRequestId}/{n}.jpg — the Designer's photo (§5.22)
+    match /gift_cards/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && isImageUpload();
+      allow delete: if isOwner(uid);
+    }
+    // reviews/{uid}/{orderId}_{productId}/{n}.jpg — review photos (§5.26, Phase 9).
+    // Shown publicly only through the download URLs (with their token) stored on
+    // an approved review; SDK access stays with the author and admins.
+    match /reviews/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && isImageUpload();
+      allow delete: if isOwner(uid);
+    }
+
+    // ── Catalogue, broadcast & reel media (admin dashboard): public read, admin write ─
+    // products/{productId}/{n}.jpg and products/{productId}/options/{group}-{value}.jpg;
+    // sellers for their own store's products.
+    match /products/{productId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if (isAdmin() || sellerMayWriteProduct(productId)) && isImageUpload();
+      allow delete: if isAdmin() || sellerMayWriteProduct(productId);
+    }
+    // stores/{storeId}/logo.jpg and cover.jpg — admins and that store's seller.
+    match /stores/{storeId}/{file} {
+      allow read: if true;
+      allow create, update: if file in ['logo.jpg', 'cover.jpg'] && (isAdmin() || isSellerOf(storeId)) && isImageUpload();
+      allow delete: if file in ['logo.jpg', 'cover.jpg'] && (isAdmin() || isSellerOf(storeId));
+    }
+    // gift_card_templates/{id}.jpg — template artwork.
+    match /gift_card_templates/{file} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+    // categories/{id}.png
+    match /categories/{file} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+    // banners/{id}{suffix}.jpg
+    match /banners/{file} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+    // broadcasts/{imageId}.jpg — the image of a push broadcast (sendBroadcast).
+    match /broadcasts/{file} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+    // reels/{id}.mp4 (the video) and reels/{id}.jpg (its poster) — Phase 11,
+    // staff only; onReelWrite deletes both when the reel is deleted.
+    match /reels/{file} {
+      allow read: if true;
+      allow create, update: if isAdmin() && (isImageUpload() || isReelVideoUpload());
+      allow delete: if isAdmin();
+    }
+
+    // ── Everything else: denied (explicit; an allow above still allows) ────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

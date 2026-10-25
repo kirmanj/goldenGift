@@ -1,0 +1,1519 @@
+{
+  "@@locale": "en",
+  "appTitle": "Golden Gift",
+  "appTagline": "Personalized gifts, made for them",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "ok": "OK",
+  "done": "Done",
+  "next": "Next",
+  "back": "Back",
+  "skip": "Skip",
+  "search": "Search",
+  "viewAll": "View All",
+  "noResults": "No results found",
+  "somethingWentWrong": "Something went wrong",
+  "confirm": "Confirm",
+  "edit": "Edit",
+  "close": "Close",
+  "apply": "Apply",
+  "home": "Home",
+  "cart": "Cart",
+  "profile": "Profile",
+  "createYourAccount": "Create Your Account",
+  "registerSubtitle": "Register now and start creating personalized gifts in minutes!",
+  "signUp": "Sign Up",
+  "signIn": "Sign In",
+  "yourName": "Your Name",
+  "enterYourName": "Enter your name",
+  "email": "Email",
+  "enterYourEmail": "Enter your email",
+  "mobileNumber": "Mobile Number",
+  "enterYourNumber": "Enter your number",
+  "haveReferralCode": "Have a referral code?",
+  "alreadyHaveAccount": "Already have an account?",
+  "or": "Or",
+  "continueAsGuest": "Continue as a guest",
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "aiGiftSearch": "AI Gift Search",
+  "aiGiftSearchHint": "Describe who it's for or the occasion",
+  "popular": "Popular",
+  "featured": "Featured",
+  "forYou": "For you",
+  "giftCards": "Gift Cards",
+  "discover": "Discover",
+  "all": "All",
+  "more": "More",
+  "myCart": "My Cart",
+  "emptyCartTitle": "Your Golden Gift cart is feeling lonely!",
+  "emptyCartSubtitle": "Let's fill it with personalized magic. Start designing your perfect gifts now!",
+  "startShopping": "Start Shopping",
+  "products": "Products",
+  "searchForProduct": "Search for a product",
+  "allCategories": "All Categories",
+  "searchForCategory": "Search for a category",
+  "productDetails": "Product Details",
+  "aboutTheProduct": "About the Product",
+  "addToCart": "Add to Cart",
+  "share": "Share",
+  "preparationDays": "{days, plural, =1{This product requires 1 day for preparation} other{This product requires {days} days for preparation}}",
+  "@preparationDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "sameDayShipping": "This product can be shipped same day",
+  "availableOnlyIn": "Available only in: {cities}",
+  "@availableOnlyIn": {
+    "placeholders": {
+      "cities": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadYourPhotos": "Upload your photos",
+  "customizeTextHint": "Enter the text you want to customize on your product",
+  "selectADate": "Select a date",
+  "notes": "Notes",
+  "account": "Account",
+  "orders": "Orders",
+  "myWishlists": "My Wishlists",
+  "wishlistSubtitle": "Gifts you've saved",
+  "secretSanta": "Secret Santa",
+  "secretSantaSubtitle": "Family, friends and work exchanges",
+  "savedCards": "Saved Cards",
+  "myWallet": "My Wallet",
+  "inviteAndEarn": "Invite & Earn",
+  "specialRequests": "Special Requests",
+  "savedAddresses": "Saved Addresses",
+  "myGiftCards": "My Gift Cards",
+  "promoCodes": "Promo Codes",
+  "contactUs": "Contact Us",
+  "availableBalance": "Available Balance",
+  "noTransactionsYet": "No Transactions Yet",
+  "transactionHistoryHint": "Your Transaction History will appear here",
+  "creditsBalance": "Golden Gift Credits Balance",
+  "successfulReferrals": "Successful Referrals",
+  "pendingReferrals": "Pending Referrals",
+  "yourReferralCode": "Your referral code",
+  "inviteFriends": "Invite Friends",
+  "walletTransactions": "Transactions",
+  "walletBalance": "Balance",
+  "walletCredits": "Credits",
+  "walletSignInBody": "Sign in to see your balance, credits and transactions.",
+  "txnTopUp": "Top-up",
+  "txnOrderPayment": "Order payment",
+  "txnRefund": "Refund",
+  "txnReferralCredit": "Referral reward",
+  "txnGiftCardRedeem": "Gift card redeemed",
+  "txnAdminAdjustment": "Balance adjustment",
+  "txnCreditExpiry": "Credits expired",
+  "creditsExpiryNote": "{days, plural, =1{Credits expire 1 day after you receive them.} other{Credits expire {days} days after you receive them.}}",
+  "@creditsExpiryNote": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "promoHeaderTitle": "Love a Good Deal? We Do Too! 🎉",
+  "promoPercentOff": "{percent}% Off",
+  "@promoPercentOff": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "promoAmountOff": "{amount} Off",
+  "@promoAmountOff": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "promoCopyCode": "Copy code",
+  "codeCopied": "Copied",
+  "promoMinOrder": "Min. order {amount}",
+  "@promoMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "promoMaxDiscount": "Max. discount {amount}",
+  "@promoMaxDiscount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "promoFirstOrderOnly": "First order only",
+  "promoUse": "Use",
+  "promoAppliedLabel": "Applied",
+  "promoAppliedSnack": "{code} applied to your cart",
+  "@promoAppliedSnack": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "noPromoCodesTitle": "No promo codes right now",
+  "noPromoCodesBody": "New deals show up here — check back soon.",
+  "promoCodeHint": "Promo code",
+  "promoNotFound": "This code doesn't exist",
+  "promoInactive": "This code is no longer active",
+  "promoExpired": "This code has expired",
+  "promoMinOrderNotMet": "Minimum order for this code is {amount}",
+  "@promoMinOrderNotMet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "promoUsageLimit": "This code has reached its usage limit",
+  "promoPerUserLimit": "You've already used this code",
+  "promoFirstOrderOnlyError": "This code is only for your first order",
+  "promoNotApplicable": "Not valid for the items in your cart",
+  "promoDiscountRow": "Promo ({code})",
+  "@promoDiscountRow": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "promoSaved": "You save {amount}",
+  "@promoSaved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "useMyCredits": "Use my credits ({amount} available)",
+  "@useMyCredits": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteFriendsBody": "Invite your friends and let them create unique gifts & products their way. 🎁✨",
+  "successfulReferralsHint": "Friends who signed up and placed a paid order",
+  "pendingReferralsHint": "Friends who signed up — reward when they order",
+  "referralBothGet": "Share it with friends — you'll both get {amount}",
+  "@referralBothGet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "referralEachGets": "Share it with friends — they get {friend}, you get {you}",
+  "@referralEachGets": {
+    "placeholders": {
+      "friend": {
+        "type": "String"
+      },
+      "you": {
+        "type": "String"
+      }
+    }
+  },
+  "referralYouGet": "Share it with friends — you get {you} after their first paid order",
+  "@referralYouGet": {
+    "placeholders": {
+      "you": {
+        "type": "String"
+      }
+    }
+  },
+  "referralFriendGets": "Share it with friends — they get {friend} when they join",
+  "@referralFriendGets": {
+    "placeholders": {
+      "friend": {
+        "type": "String"
+      }
+    }
+  },
+  "learnMoreReferrals": "Learn more about referrals",
+  "copyReferralCode": "Copy referral code",
+  "referralShareText": "Join me on Golden Gift for personalized gifts! Sign up with my code {code} and get {amount} in credits: {link}",
+  "@referralShareText": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "referralShareTextNoBonus": "Join me on Golden Gift for personalized gifts! Sign up with my code {code}: {link}",
+  "@referralShareTextNoBonus": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "referralShareSubject": "Join me on Golden Gift",
+  "referralRulesTitle": "How referrals work",
+  "referralRuleJoin": "Your friend signs up with your code and gets {amount} in credits.",
+  "@referralRuleJoin": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "referralRuleOrder": "You get {amount} in credits when their first order is delivered and paid.",
+  "@referralRuleOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "referralRuleMonthlyCap": "{count, plural, =1{You can be rewarded for 1 friend per month.} other{You can be rewarded for up to {count} friends per month.}}",
+  "@referralRuleMonthlyCap": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "referralRuleSpend": "Credits can be spent on any order in the app; they can't be withdrawn as cash.",
+  "referralRuleFairUse": "Referring yourself, or another account on the same device, doesn't earn rewards.",
+  "referralInvitesTitle": "Your invites",
+  "referralStatusPending": "Pending",
+  "referralStatusCompleted": "Rewarded",
+  "referralStatusCancelled": "Cancelled",
+  "referralAFriend": "A friend",
+  "inviteSignInBody": "Sign in to get your referral code and invite friends.",
+  "referralRewardsChip": "Referral rewards",
+  "referralSheetTitle": "Invite friends, earn credits",
+  "referralSheetBody": "Share your personal link once and get rewarded when friends discover Golden Gift.",
+  "referralFriendJoins": "Friend joins",
+  "referralFirstPaidOrder": "First paid order",
+  "referralShareLinkTitle": "Share your invite link",
+  "referralShareLinkBody": "Open My Rewards anytime to copy or share it.",
+  "referralWatchCreditsTitle": "Watch credits build up",
+  "referralWatchBoth": "They get {friend} when they join, and you earn {you} after their first paid order.",
+  "@referralWatchBoth": {
+    "placeholders": {
+      "friend": {
+        "type": "String"
+      },
+      "you": {
+        "type": "String"
+      }
+    }
+  },
+  "referralWatchYou": "You earn {you} after their first paid order.",
+  "@referralWatchYou": {
+    "placeholders": {
+      "you": {
+        "type": "String"
+      }
+    }
+  },
+  "referralWatchFriend": "They get {friend} when they join.",
+  "@referralWatchFriend": {
+    "placeholders": {
+      "friend": {
+        "type": "String"
+      }
+    }
+  },
+  "referralMyRewards": "My Rewards",
+  "referralInvite": "Invite",
+  "referralMaybeLater": "Maybe later",
+  "referralLinkSignedIn": "Referral codes are for new accounts. Invite your own friends from Invite & Earn.",
+  "submitYourRequest": "Submit your request",
+  "writeYourIdeaHere": "Write your idea here",
+  "expiresOn": "Expires on: {date}",
+  "@expiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfStock": "Out of stock",
+  "filter": "Filter",
+  "clear": "Clear",
+  "addToWishlist": "Add to wishlist",
+  "removeFromWishlist": "Remove from wishlist",
+  "originalPrice": "Original price {price}",
+  "@originalPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "percentOff": "{percent}% off",
+  "@percentOff": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingTitle1": "Personalize every gift",
+  "onboardingBody1": "Add names, photos, colours and messages to make it truly theirs.",
+  "onboardingTitle2": "Delivered with care",
+  "onboardingBody2": "Delivery across Iraq and the Kurdistan Region — wrapped and ready to give.",
+  "onboardingTitle3": "Earn credits",
+  "onboardingBody3": "Invite friends and collect Golden Gift credits when they order.",
+  "getStarted": "Get started",
+  "signInTitle": "Welcome back",
+  "signInSubtitle": "Sign in with your mobile number to continue.",
+  "dontHaveAccount": "Don't have an account?",
+  "referralCodeLabel": "Referral code",
+  "referralCodeHint": "6-character code",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithApple": "Continue with Apple",
+  "selectCountry": "Select country",
+  "termsAgreement": "By continuing you agree to our Terms of Service and Privacy Policy.",
+  "completeProfileTitle": "Complete your account",
+  "completeProfileSubtitle": "Tell us a little about you to finish signing up.",
+  "phoneLaterNote": "You can add your mobile number later — it's needed before checkout.",
+  "otpTitle": "Verify your number",
+  "otpSubtitle": "Enter the 6-digit code we sent to {phone}",
+  "@otpSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResendIn": "Resend code in {seconds}s",
+  "@otpResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "otpResend": "Resend code",
+  "otpVerify": "Verify",
+  "otpCodeSent": "Code sent",
+  "changeNumber": "Change number",
+  "errorRequired": "This field is required",
+  "errorNameLength": "Name must be 2–50 characters",
+  "errorInvalidEmail": "Enter a valid email address",
+  "errorInvalidPhone": "Enter a valid mobile number",
+  "errorInvalidReferralCode": "Referral codes have 6 letters or digits",
+  "authErrorInvalidCode": "That code isn't right. Check it and try again.",
+  "authErrorCodeExpired": "The code expired. Request a new one.",
+  "authErrorTooManyRequests": "Too many attempts. Please try again later.",
+  "authErrorNetwork": "No internet connection. Check your connection and try again.",
+  "authErrorPhoneInUse": "This number is already linked to another account.",
+  "authErrorUnavailable": "This sign-in option isn't available yet.",
+  "authErrorAccountDisabled": "This account has been disabled. Contact us for help.",
+  "signInToContinue": "Sign in to continue",
+  "signInToContinueBody": "Create an account or sign in to save gifts, check out and track your orders.",
+  "maintenanceTitle": "We'll be right back",
+  "maintenanceBody": "Golden Gift is getting a small upgrade. Please check back soon.",
+  "updateRequiredTitle": "Update required",
+  "updateRequiredBody": "A new version of Golden Gift is available. Please update to continue.",
+  "updateNow": "Update now",
+  "guest": "Guest",
+  "guestProfileTitle": "You're browsing as a guest",
+  "guestProfileBody": "Sign in to see your orders, wallet and saved gifts.",
+  "inviteAndEarnSubtitle": "Earn {amount} per friend",
+  "@inviteAndEarnSubtitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Language",
+  "chooseLanguage": "Choose language",
+  "settings": "Settings",
+  "logout": "Log out",
+  "logoutConfirm": "Log out of Golden Gift?",
+  "addPhoneNumber": "Add mobile number",
+  "editProfile": "Edit Profile",
+  "changePhoto": "Change photo",
+  "birthday": "Birthday",
+  "selectBirthday": "Select your birthday",
+  "gender": "Gender",
+  "genderMale": "Male",
+  "genderFemale": "Female",
+  "genderPreferNot": "Prefer not to say",
+  "city": "City",
+  "selectCity": "Select your city",
+  "changePhone": "Change",
+  "profileSaved": "Profile saved",
+  "phoneUpdated": "Mobile number updated",
+  "changePhoneTitle": "Change mobile number",
+  "changePhoneSubtitle": "We'll send a verification code to your new number.",
+  "sendCode": "Send code",
+  "phoneChangeMobileOnly": "Changing your number is available in the mobile app.",
+  "photoUploadFailed": "Couldn't upload the photo. Please try again.",
+  "unsavedChanges": "Discard your changes?",
+  "discard": "Discard",
+  "notificationsSetting": "Notifications",
+  "notificationsSettingSubtitle": "Order updates and offers",
+  "appearance": "Appearance",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccount": "Delete account",
+  "deleteAccountTitle": "Delete your account?",
+  "deleteAccountBody": "Your profile, addresses, cart and wishlist will be removed. Past orders are kept for our records. This can't be undone.",
+  "deleteAccountConfirm": "Delete my account",
+  "accountDeleted": "Your account has been deleted.",
+  "languageEnglish": "English",
+  "languageArabic": "العربية",
+  "languageKurdish": "کوردی",
+  "takePhoto": "Take photo",
+  "@takePhoto": {
+    "description": "Profile photo source option (Edit Profile)"
+  },
+  "chooseFromGallery": "Choose from gallery",
+  "@chooseFromGallery": {
+    "description": "Profile photo source option (Edit Profile)"
+  },
+  "authErrorDeliveryFailed": "We couldn't send the code. Check the number and your connection, then try again.",
+  "profileCompletionTitle": "Complete your profile to unlock better recommendations",
+  "goToProfile": "Go to profile",
+  "notifications": "Notifications",
+  "filters": "Filters",
+  "sortBy": "Sort by",
+  "sortRelevance": "Best match",
+  "sortNewest": "Newest",
+  "sortPopular": "Most popular",
+  "sortPriceLowHigh": "Price: low to high",
+  "sortPriceHighLow": "Price: high to low",
+  "price": "Price",
+  "priceUnder": "Under {amount}",
+  "@priceUnder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "priceBetween": "{min} – {max}",
+  "@priceBetween": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "priceAndAbove": "{amount} and above",
+  "@priceAndAbove": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "availability": "Availability",
+  "sameDayOnly": "Ships same day",
+  "onSaleOnly": "On sale",
+  "deliverTo": "Deliver to",
+  "anyCity": "Any city",
+  "resetFilters": "Reset",
+  "showResults": "Show results",
+  "offlineChip": "Offline — showing saved items",
+  "noProductsTitle": "No gifts found",
+  "noProductsBody": "Try another search or remove some filters.",
+  "searchFallbackNote": "Search is limited right now — showing matches from all categories and cities.",
+  "noCategoriesMatch": "No categories match your search",
+  "loadMoreFailed": "Couldn't load more gifts.",
+  "readMore": "Read more",
+  "readLess": "Show less",
+  "optionalLabel": "(Optional)",
+  "optionRequiredError": "Please choose an option",
+  "textRequiredError": "Please enter the text",
+  "dateRequiredError": "Please choose a date",
+  "textTooLongError": "Keep it to {max} characters",
+  "@textTooLongError": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photosRequiredError": "{min, plural, =1{Add a photo} other{Add at least {min} photos}}",
+  "@photosRequiredError": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "optionUnavailableError": "This option is sold out — choose another",
+  "addedToCart": "Added to cart",
+  "viewCart": "View cart",
+  "uploadingPhotos": "Uploading photos… {percent}%",
+  "@uploadingPhotos": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTooLarge": "This photo is larger than 10 MB",
+  "removePhoto": "Remove photo",
+  "photoSlot": "Photo {n}",
+  "@photoSlot": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "quantity": "Quantity",
+  "productNotFound": "This gift is no longer available",
+  "subtotal": "Subtotal",
+  "deliveryFee": "Delivery",
+  "deliveryCalculatedAtCheckout": "Calculated at checkout",
+  "total": "Total",
+  "checkout": "Checkout",
+  "remove": "Remove",
+  "itemUnavailable": "No longer available — not included in the total",
+  "priceChangedNote": "Price updated to {price}",
+  "@priceChangedNote": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "soldBy": "Sold by {store}",
+  "@soldBy": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "photosCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wishlistEmptyTitle": "No saved gifts yet",
+  "wishlistEmptyBody": "Tap the heart on any gift to save it here.",
+  "increaseQuantity": "Increase quantity",
+  "decreaseQuantity": "Decrease quantity",
+  "addAddress": "Add address",
+  "editAddress": "Edit address",
+  "addressLabel": "Label (e.g. Home, Work)",
+  "recipientName": "Recipient name",
+  "area": "Area / district",
+  "street": "Street",
+  "building": "Building",
+  "floor": "Floor / apartment",
+  "addressNotes": "Directions for the courier",
+  "defaultAddress": "Default",
+  "setAsDefault": "Set as default",
+  "deleteAddressConfirm": "Delete this address?",
+  "noAddressesTitle": "No saved addresses",
+  "noAddressesBody": "Add an address to get your gifts delivered.",
+  "deliveryAddress": "Delivery address",
+  "changeAddress": "Change",
+  "deliveryDateAndTime": "Delivery date & time",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "yesterday": "Yesterday",
+  "noSlotsToday": "No delivery times left today — choose another day",
+  "giftOptions": "Gift options",
+  "thisIsAGift": "This is a gift",
+  "hidePricesOnInvoice": "Hide prices on the invoice",
+  "giftMessage": "Gift message",
+  "giftMessageHint": "Write a message for the card",
+  "paymentMethod": "Payment method",
+  "cashOnDelivery": "Cash on delivery",
+  "walletPayment": "Wallet & credits",
+  "cardPayment": "Card / e-wallet",
+  "orderSummary": "Order summary",
+  "placeOrder": "Place order",
+  "placingOrder": "Placing your order…",
+  "itemNotDeliverableToCity": "{item} can't be delivered to this city",
+  "@itemNotDeliverableToCity": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "minimumOrderNotMet": "The minimum order is {amount}",
+  "@minimumOrderNotMet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderFailedCartChanged": "Some items changed. Please review your cart.",
+  "orderFailedOutOfStock": "Some items just sold out. Please review your cart.",
+  "orderFailedCity": "Some items can't be delivered to the selected city.",
+  "orderFailedUnavailable": "Ordering isn't available right now. Please try again later.",
+  "orderPlacedTitle": "Order placed!",
+  "orderPlacedBody": "Thank you! We've received order {number}.",
+  "@orderPlacedBody": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "estimatedDelivery": "Estimated delivery",
+  "trackOrder": "Track order",
+  "continueShopping": "Continue shopping",
+  "activeOrders": "Active",
+  "completedOrders": "Completed",
+  "cancelledOrders": "Cancelled",
+  "noOrdersTitle": "No orders yet",
+  "noOrdersBody": "Your orders will appear here.",
+  "orderNumber": "Order {number}",
+  "@orderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetails": "Order details",
+  "orderStatus": "Order status",
+  "items": "Items",
+  "paymentInfo": "Payment",
+  "cancelOrder": "Cancel order",
+  "cancelOrderConfirm": "Cancel this order?",
+  "cancelReasonHint": "Reason (optional)",
+  "orderCancelled": "Order cancelled",
+  "orderNotCancellable": "This order can no longer be cancelled.",
+  "reorder": "Reorder",
+  "reorderAdded": "Items added to your cart",
+  "contactSupport": "Contact support",
+  "statusPending": "Pending",
+  "statusConfirmed": "Confirmed",
+  "statusPreparing": "Preparing",
+  "statusReadyForDelivery": "Ready for delivery",
+  "statusOutForDelivery": "Out for delivery",
+  "statusDelivered": "Delivered",
+  "statusCancelledByBuyer": "Cancelled",
+  "statusCancelledBySeller": "Cancelled by the store",
+  "statusReturned": "Returned",
+  "statusRefunded": "Refunded",
+  "markAllRead": "Mark all as read",
+  "noNotificationsTitle": "No notifications yet",
+  "noNotificationsBody": "Order updates and offers will show up here.",
+  "contactUsBody": "We're here to help — reach us any way you like.",
+  "contactWhatsapp": "WhatsApp",
+  "contactCall": "Call us",
+  "contactEmail": "Email",
+  "contactInstagram": "Instagram",
+  "discount": "Discount",
+  "paymentStatusPending": "Not paid yet",
+  "paymentStatusPaid": "Paid",
+  "paymentStatusFailed": "Payment failed",
+  "paymentStatusRefunded": "Refunded",
+  "paymentZainCash": "ZainCash",
+  "paymentZainCashHint": "Pay on ZainCash's secure page",
+  "zainCashMinimum": "ZainCash needs at least {amount} to pay. Choose another payment method.",
+  "@zainCashMinimum": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentConnecting": "Opening ZainCash…",
+  "paymentOrderSaved": "Your order is saved — you can pay it from Order details.",
+  "paymentErrorDisabled": "Online payment is switched off right now. Please choose another payment method.",
+  "paymentErrorNotPayable": "This order can't be paid online.",
+  "paymentErrorAlreadyPaid": "This order is already paid.",
+  "paymentErrorExpired": "The time to pay this order has run out.",
+  "paymentErrorUnavailable": "ZainCash isn't available right now. Nothing was charged — please try again in a moment.",
+  "paymentOpenFailed": "We couldn't open ZainCash. Tap “Open ZainCash again”.",
+  "paymentWaitingTitle": "Complete your payment on ZainCash",
+  "paymentWaitingBody": "We opened ZainCash's secure page. After you pay, come back here — this page updates by itself.",
+  "paymentAmountToPay": "Amount to pay",
+  "paymentForTopUp": "Wallet top-up",
+  "paymentTimeLeft": "Time left to pay: {time}",
+  "@paymentTimeLeft": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentOpenAgain": "Open ZainCash again",
+  "paymentCheckStatus": "I've paid — check status",
+  "paymentStillPending": "ZainCash hasn't confirmed the payment yet. This page updates as soon as it does.",
+  "paymentTimeUp": "Time's up. We're confirming the result with ZainCash — this can take a few minutes.",
+  "paymentChecking": "Checking your payment…",
+  "paymentNotFound": "We couldn't find this payment.",
+  "paymentFailedTitle": "Payment didn't go through",
+  "paymentExpiredTitle": "Time to pay ran out",
+  "paymentOrderCancelledBody": "Order {number} was cancelled. Nothing was charged, and any credits you used are back in your wallet.",
+  "@paymentOrderCancelledBody": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentNothingCharged": "Nothing was charged. You can try again.",
+  "paymentTryAgain": "Try again",
+  "paymentLateCreditedTitle": "Payment received",
+  "paymentLateCreditedBody": "The order had already been cancelled, so we added {amount} to your wallet balance.",
+  "@paymentLateCreditedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpSuccessTitle": "Top-up complete",
+  "topUpSuccessBody": "Added {amount} to your balance.",
+  "@topUpSuccessBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "backToWallet": "Back to wallet",
+  "payNow": "Pay now",
+  "payWithinNote": "Pay within {time}, or the order will be cancelled automatically.",
+  "@payWithinNote": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelReasonPaymentFailed": "The payment didn't go through",
+  "orderCancelReasonPaymentExpired": "Not paid in time",
+  "walletTopUp": "Top up",
+  "topUpTitle": "Top up your balance",
+  "topUpBody": "Pay with ZainCash — the amount is added to your wallet balance.",
+  "topUpOtherAmount": "Other amount",
+  "topUpAmountHint": "Between {min} and {max}",
+  "@topUpAmountHint": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpAmountRange": "Enter an amount between {min} and {max}.",
+  "@topUpAmountRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpContinue": "Continue to ZainCash",
+  "orderFailedPromo": "Your promo code can no longer be used, so we removed it. Please check the new total.",
+  "@orderFailedPromo": {
+    "description": "Checkout: promo rejected by placeOrder"
+  },
+  "walletInsufficient": "Your wallet doesn't cover this order. Choose cash on delivery or turn on your credits.",
+  "@walletInsufficient": {
+    "description": "Checkout: wallet payment does not cover the total"
+  },
+  "orderFailedInvalidChoice": "That delivery time or payment method is no longer available. Please choose again.",
+  "checkoutRemoveUnavailable": "Some items in your cart are no longer available. Remove them from the cart to continue.",
+  "giftCardLabel": "GIFT CARD",
+  "giftCardFrom": "From {amount}",
+  "@giftCardFrom": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardTo": "To: {name}",
+  "@giftCardTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardShopTitle": "Gift Card Shop",
+  "giftCardShopEmptyTitle": "No gift cards available yet",
+  "giftCardShopEmptyBody": "New designs are coming soon.",
+  "giftCardDesignTagline": "Design your gift card — make it personal.",
+  "giftCardDesignerTitle": "Design Your Gift Card",
+  "giftCardDesignTitle": "Card design",
+  "giftCardAmountTitle": "Amount",
+  "giftCardCustomAmount": "Custom",
+  "giftCardAmountHint": "Between {min} and {max}",
+  "@giftCardAmountHint": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardAmountRequired": "Enter an amount",
+  "giftCardAmountRange": "Choose an amount between {min} and {max}",
+  "@giftCardAmountRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardPhotoTitle": "Photo",
+  "giftCardMessageTitle": "Message",
+  "giftCardRecipientTitle": "Recipient",
+  "giftCardRecipientPhone": "Recipient's mobile number",
+  "giftCardContactHint": "We'll send the card to this phone number or email.",
+  "giftCardContactRequired": "Add the recipient's phone number or email",
+  "giftCardWhenTitle": "When to send",
+  "giftCardSendNow": "Send now",
+  "giftCardSchedule": "Schedule",
+  "giftCardSendNowNote": "We send it as soon as it's paid.",
+  "giftCardSendOn": "Send on",
+  "giftCardScheduleRequired": "Choose the day to send the card",
+  "giftCardScheduleRange": "Choose a day from tomorrow up to one year ahead",
+  "giftCardWalletBalance": "Wallet balance",
+  "giftCardWalletNote": "Paid from your wallet balance ({balance}). Credits can't be used for gift cards.",
+  "@giftCardWalletNote": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardWalletShort": "Your wallet balance ({balance}) doesn't cover this card. Credits can't be used for gift cards.",
+  "@giftCardWalletShort": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardCodNote": "Our courier collects payment at your address; the card is sent once paid.",
+  "giftCardAddressRequired": "Add the address where we collect the payment",
+  "giftCardBuy": "Buy gift card",
+  "giftCardFixErrors": "Please check the highlighted fields",
+  "giftCardUnavailable": "This gift card is no longer available",
+  "giftCardHaveCode": "Have a gift card code?",
+  "giftCardRedeem": "Redeem",
+  "giftCardRedeemToCredits": "Redeem to my credits",
+  "giftCardCodeInvalid": "Enter the 12-character code",
+  "giftCardsReceived": "Received",
+  "giftCardsSent": "Sent",
+  "giftCardsReceivedEmptyTitle": "No gift cards yet",
+  "giftCardsReceivedEmptyBody": "Gift cards sent to you appear here. Got a code? Enter it above.",
+  "giftCardsSentEmptyTitle": "You haven't sent a gift card yet",
+  "giftCardsSentEmptyBody": "Surprise someone with a personal gift card.",
+  "giftCardDesignCta": "Design a gift card",
+  "giftCardStatusPending": "Awaiting payment",
+  "giftCardStatusScheduled": "Scheduled",
+  "giftCardStatusActive": "Active",
+  "giftCardStatusSent": "Sent",
+  "giftCardStatusRedeemed": "Redeemed",
+  "giftCardStatusExpired": "Expired",
+  "giftCardStatusDisabled": "Disabled",
+  "giftCardBalance": "Balance: {amount}",
+  "@giftCardBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardSentOn": "Sent on {date}",
+  "@giftCardSentOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardScheduledFor": "Will be sent on {date}",
+  "@giftCardScheduledFor": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardRedeemedTitle": "Gift card redeemed!",
+  "giftCardRedeemedBody": "{amount} added to your credits",
+  "@giftCardRedeemedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "giftCardViewWallet": "View my wallet",
+  "redeemNotFound": "We couldn't find a gift card with this code. Check it and try again.",
+  "redeemExpired": "This gift card has expired.",
+  "redeemAlreadyRedeemed": "This gift card has already been redeemed.",
+  "redeemDisabled": "This gift card can't be used. Please contact support.",
+  "redeemNotYetSent": "This gift card isn't active yet — it's activated once it's paid and sent.",
+  "redeemTooManyAttempts": "Too many attempts. Please try again later.",
+  "redeemUnavailable": "Redeeming isn't available right now. Please try again later.",
+  "srAddPhoto": "Add a photo",
+  "srSubtitle": "Got a special idea? Tell us about it and we'll reach out soon to bring it to life!",
+  "srPhotosHint": "Add up to {max} photos (optional)",
+  "@srPhotosHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "srTextRequired": "Tell us about your idea",
+  "srSubmitted": "Thanks! We received your request and will reach out soon.",
+  "srMyRequests": "My requests",
+  "srStatusSubmitted": "Submitted",
+  "srStatusInReview": "In review",
+  "srStatusQuoted": "Quoted",
+  "srStatusAccepted": "Accepted",
+  "srStatusRejected": "Rejected",
+  "srStatusCompleted": "Completed",
+  "srTypeSupport": "Support",
+  "srNewReply": "New reply",
+  "srDetailsTitle": "Your request",
+  "srNotFound": "We couldn't find this request",
+  "srMessages": "Messages",
+  "srNoMessages": "No messages yet — we'll reply here.",
+  "srYou": "You",
+  "srReplyHint": "Write a message",
+  "srSend": "Send",
+  "srClosedNote": "This request is closed. For anything else, send us a new request.",
+  "srRejectedNote": "Sorry, we can't make this one. Feel free to send us another idea.",
+  "srQuoteTitle": "Our quote",
+  "srQuoteDeliveryNote": "The delivery fee is added at the next step.",
+  "srAcceptQuote": "Accept quote",
+  "srViewOrder": "View order",
+  "srQuoteUnavailable": "This quote can no longer be accepted",
+  "srBackToRequest": "Back to request",
+  "srCityNotServed": "We don't deliver to this city yet. Choose another address.",
+  "srWalletShort": "Your wallet balance ({balance}) doesn't cover this order.",
+  "@srWalletShort": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "srQuoteRow": "Quote",
+  "srConfirmOrder": "Confirm order",
+  "supportSendUsMessage": "Send us a message",
+  "supportMessageHint": "How can we help?",
+  "supportSend": "Send",
+  "supportMessageSent": "Message sent! We'll reply in your messages soon.",
+  "supportViewMessages": "View your messages",
+  "supportSendAnother": "Send another",
+  "partnerScreenTitle": "Become a Partner",
+  "partnerHeroTitle": "Sell on Golden Gift",
+  "partnerHeroBody": "Bring your gifts to more people across Iraq and Kurdistan.",
+  "partnerWhyTitle": "Why partner with us",
+  "partnerBenefitReachTitle": "Reach more customers",
+  "partnerBenefitReachBody": "Show your products to gift shoppers in every city we serve.",
+  "partnerBenefitDashboardTitle": "Your own store dashboard",
+  "partnerBenefitDashboardBody": "Manage your products and orders in one place.",
+  "partnerBenefitPersonalTitle": "Made-to-order gifts",
+  "partnerBenefitPersonalBody": "Receive customers' names, photos and messages with every order.",
+  "partnerFormTitle": "Apply to sell",
+  "partnerStoreName": "Store name",
+  "partnerStoreNameLength": "Store name must be 2–60 characters",
+  "partnerOwnerName": "Owner name",
+  "partnerCategory": "What do you sell?",
+  "partnerCategoryHint": "e.g. Engraved wood, flowers, cakes",
+  "partnerInstagramInvalid": "Enter a valid Instagram username",
+  "partnerSamplePhotos": "Sample product photos",
+  "partnerSubmit": "Submit application",
+  "partnerThanksTitle": "Thank you for applying!",
+  "partnerThanksBody": "We received your application and will contact you soon.",
+  "partnerPendingTitle": "We're reviewing your application",
+  "partnerPendingBody": "Thanks for applying to sell {store} on Golden Gift. We'll contact you soon.",
+  "@partnerPendingBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "partnerYourStore": "your store",
+  "partnerActiveTitle": "Your store is live",
+  "partnerActiveBody": "Manage it in the Golden Gift dashboard:",
+  "partnerOpenDashboard": "Open dashboard",
+  "partnerCopyLink": "Copy link",
+  "partnerSuspendedTitle": "Your store is suspended",
+  "partnerSuspendedBody": "Please contact our support team to resolve this.",
+  "partnerAlreadyApplied": "You've already applied with this account.",
+  "partnerInvalid": "Please check your details and try again.",
+  "partnerUnavailable": "Applications aren't available right now. Please try again later.",
+  "aiSearchFieldHint": "e.g. My sister's graduation, she loves plants",
+  "aiSearchExamplesTitle": "Try an example",
+  "aiSearchOccasion": "Occasion",
+  "aiSearchRecipient": "Who it's for",
+  "aiSearchBudget": "Budget",
+  "aiSearchAnyBudget": "Any budget",
+  "aiSearchUpTo": "Up to {amount}",
+  "@aiSearchUpTo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "aiOccasionBirthday": "Birthday",
+  "aiOccasionAnniversary": "Anniversary",
+  "aiOccasionGraduation": "Graduation",
+  "aiOccasionWedding": "Wedding",
+  "aiOccasionNewBaby": "New baby",
+  "aiOccasionEid": "Eid",
+  "aiOccasionThankYou": "Thank you",
+  "aiRecipientMum": "Mum",
+  "aiRecipientDad": "Dad",
+  "aiRecipientWife": "Wife",
+  "aiRecipientHusband": "Husband",
+  "aiRecipientSister": "Sister",
+  "aiRecipientBrother": "Brother",
+  "aiRecipientFriend": "Friend",
+  "aiRecipientColleague": "Colleague",
+  "aiRecipientChild": "Child",
+  "aiSearchFindGifts": "Find gifts",
+  "aiSearchQueryRequired": "Tell us who the gift is for or the occasion.",
+  "aiSearchQueryTooShort": "Add a few more words so we can find the right gifts.",
+  "aiSearchResultsTitle": "Gift ideas for you",
+  "aiSearchFallbackNote": "Showing keyword matches — AI suggestions aren't available right now.",
+  "aiSearchRateLimited": "You've reached today's AI searches. Showing keyword matches instead.",
+  "aiSearchNoResultsTitle": "No gift ideas found",
+  "aiSearchNoResultsBody": "Try describing them in other words, or choose a bigger budget.",
+  "secretSantaIntro": "Draw names with family, friends or colleagues — everyone only sees who they're buying for.",
+  "secretSantaCreateGroup": "Create group",
+  "secretSantaJoinWithCode": "Join with a code",
+  "secretSantaCodeHint": "8-character invite code",
+  "secretSantaJoin": "Join",
+  "secretSantaInvalidCode": "Enter the 8-character code from your invite.",
+  "secretSantaNoGroupsTitle": "No groups yet",
+  "secretSantaNoGroupsBody": "Create a group, or join one with the invite code you received.",
+  "secretSantaTypeFamily": "Family",
+  "secretSantaTypeFriends": "Friends",
+  "secretSantaTypeWork": "Work",
+  "secretSantaStatusOpen": "Open",
+  "secretSantaStatusDrawn": "Drawn",
+  "secretSantaStatusClosed": "Closed",
+  "secretSantaOrganiserBadge": "You're the organiser",
+  "secretSantaOrganiser": "Organiser",
+  "secretSantaMembersCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@secretSantaMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "secretSantaMembersOf": "Members ({count}/{max})",
+  "@secretSantaMembersOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "secretSantaBudgetValue": "{amount} per gift",
+  "@secretSantaBudgetValue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "secretSantaNoBudget": "No budget",
+  "secretSantaExchangeOn": "Exchange on {date}",
+  "@secretSantaExchangeOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "secretSantaGroupName": "Group name",
+  "secretSantaGroupNameHint": "e.g. Office 2026",
+  "secretSantaType": "Group type",
+  "secretSantaBudget": "Budget per gift",
+  "secretSantaCustomBudget": "Custom",
+  "secretSantaCustomBudgetHint": "Amount in IQD",
+  "secretSantaBudgetError": "Enter an amount.",
+  "secretSantaExchangeDate": "Exchange date",
+  "secretSantaDateError": "Choose a date from tomorrow on.",
+  "secretSantaInviteTitle": "Invite your group",
+  "secretSantaInviteBody": "Share the link or the code — members join in the Golden Gift app.",
+  "secretSantaCopyCode": "Copy code",
+  "secretSantaShareLink": "Share link",
+  "secretSantaShareText": "Join my Secret Santa group “{name}” on Golden Gift! Open {link} or enter the code {code}.",
+  "@secretSantaShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "secretSantaShareSubject": "Secret Santa on Golden Gift",
+  "secretSantaMembers": "Members",
+  "secretSantaYou": "You",
+  "secretSantaMyWishNote": "My wish note",
+  "secretSantaWishNoteHint": "What would you love to get? Your Secret Santa will see this.",
+  "secretSantaWishNoteEmpty": "Add a note so your Secret Santa knows what you'd love.",
+  "secretSantaAddNote": "Add a note",
+  "secretSantaWishNoteSaved": "Wish note saved",
+  "secretSantaDraw": "Draw names",
+  "secretSantaDrawHint": "At least {min} members are needed to draw names.",
+  "@secretSantaDrawHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "secretSantaDrawConfirmTitle": "Draw names now?",
+  "secretSantaDrawConfirmBody": "Everyone will see who they're buying for, and no one can join after the draw.",
+  "secretSantaDrawDone": "Names drawn! Everyone can now see who they're buying for.",
+  "secretSantaBuyingFor": "You're buying for {name}",
+  "@secretSantaBuyingFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "secretSantaOnlyYou": "Shh — only you can see this.",
+  "secretSantaTheirWish": "Their wish note",
+  "secretSantaNoWishNote": "They haven't added a wish note yet.",
+  "secretSantaShopForThem": "Shop for them",
+  "secretSantaDrawPending": "Names have been drawn — your match will appear in a moment.",
+  "secretSantaWaitingForDraw": "Waiting for the organiser to draw names.",
+  "secretSantaNotMember": "This group isn't available to you.",
+  "secretSantaJoinTitle": "Join Secret Santa",
+  "secretSantaJoinBody": "You've been invited with the code {code}. Add your name so the group knows who you are.",
+  "@secretSantaJoinBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "secretSantaJoinGroup": "Join group",
+  "secretSantaJoined": "You're in! Welcome to the group.",
+  "secretSantaErrorNotFound": "We couldn't find a group with that code.",
+  "secretSantaErrorAlreadyDrawn": "Names have already been drawn in this group.",
+  "secretSantaErrorFull": "This group is full.",
+  "secretSantaErrorImpossible": "No valid draw is possible with the current exclusions.",
+  "secretSantaErrorNotOrganiser": "Only the organiser can draw names.",
+  "secretSantaErrorUnavailable": "Secret Santa isn't available right now. Please try again later.",
+  "reviewsTitle": "Reviews",
+  "reviewsCount": "{count, plural, =0{No reviews yet} =1{1 review} other{{count} reviews}}",
+  "@reviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewsSeeAll": "See all",
+  "reviewStarsLabel": "Rated {rating} out of 5",
+  "@reviewStarsLabel": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewStarButton": "{count, plural, =1{1 star} other{{count} stars}}",
+  "@reviewStarButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewRate": "Rate",
+  "reviewFormTitle": "Rate this gift",
+  "reviewYourRating": "Your rating",
+  "reviewRatingRequired": "Choose a star rating.",
+  "reviewTextLabel": "Your review",
+  "reviewTextHint": "What did you love about it?",
+  "reviewAddPhotos": "Photos (up to {max})",
+  "@reviewAddPhotos": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAddPhoto": "Add photo",
+  "reviewSubmit": "Submit review",
+  "reviewThanks": "Thanks! Your review will appear after approval.",
+  "reviewPending": "Your review is pending approval",
+  "reviewReviewed": "Reviewed",
+  "reviewEdit": "Edit review",
+  "reviewEditWarning": "Editing your review sends it back for approval before it's shown again.",
+  "reviewAnonymous": "Customer",
+  "addressPinOnMap": "Pin on map",
+  "addressPinOnMapHint": "Optional — helps the driver find the door",
+  "addressLocationPinned": "Location pinned",
+  "addressChangePin": "Change",
+  "addressUseThisLocation": "Use this location",
+  "addressMapTitle": "Pin your location",
+  "addressMapHelp": "Move the map until the pin sits on your door.",
+  "wishlistDefaultList": "Favourites",
+  "wishlistNewList": "New list",
+  "wishlistListName": "List name",
+  "wishlistListNameHint": "e.g. Mum's birthday",
+  "wishlistCreateList": "Create list",
+  "wishlistRenameList": "Rename list",
+  "wishlistDeleteList": "Delete list",
+  "wishlistDeleteListConfirm": "Delete “{name}”? Its gifts move to {defaultName}.",
+  "@wishlistDeleteListConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "defaultName": {
+        "type": "String"
+      }
+    }
+  },
+  "wishlistListOptions": "List options",
+  "wishlistMoveTo": "Move to…",
+  "wishlistSaveTo": "Save to…",
+  "wishlistSavedTo": "Saved to {name}",
+  "@wishlistSavedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wishlistMovedTo": "Moved to {name}",
+  "@wishlistMovedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wishlistListEmptyTitle": "This list is empty",
+  "wishlistListEmptyBody": "Long-press the heart on any gift to save it to a list.",
+  "wishlistChooseList": "Choose a list",
+  "orderRefundedToWallet": "Refunded to your wallet: {amount}",
+  "@orderRefundedToWallet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderChangedByStore": "By the store",
+  "orderChangedByYou": "By you",
+  "comingSoon": "Coming soon",
+  "bannerSemanticLabel": "Offer {index} of {count}",
+  "@bannerSemanticLabel": {
+    "description": "Screen-reader label of a Home banner without a title.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySoonBadge": "Soon",
+  "@categorySoonBadge": {
+    "description": "Tiny pill on a coming-soon category tile / chip (SRS §5.7a). Keep it one short word."
+  },
+  "categoryComingSoonLabel": "{category}, coming soon",
+  "@categoryComingSoonLabel": {
+    "description": "Screen-reader label of a coming-soon category tile.",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "comingSoonTagline": "Curated with care. Arriving soon.",
+  "@comingSoonTagline": {
+    "description": "Line under the category name in the gold hero of the coming-soon page."
+  },
+  "comingSoonMessage": "We're crafting something special for {category}. Our team is working on it — in the meantime, discover beautiful gifts in our other categories.",
+  "@comingSoonMessage": {
+    "description": "Main message of the coming-soon page (SRS §5.7a).",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "comingSoonExploreOthers": "Explore other categories",
+  "comingSoonGiftsYouMightLove": "Gifts you might love",
+  "comingSoonExploreAll": "Explore all categories",
+  "comingSoonBackHome": "Back to home",
+  "comingSoonShowAllGifts": "Show all gifts",
+  "@comingSoonShowAllGifts": {
+    "description": "Discover's inline coming-soon card: selects the All chip again."
+  },
+  "giftForTitle": "Gift for",
+  "@giftForTitle": {
+    "description": "Title of the gift-type filter section and the Product Details line (SRS §5.8a)."
+  },
+  "giftForEveryone": "Everyone",
+  "@giftForEveryone": {
+    "description": "Gift-type filter: no gift type chosen."
+  },
+  "giftForMen": "For him",
+  "@giftForMen": {
+    "description": "Gift type `men` (SRS §5.8a)."
+  },
+  "giftForWomen": "For her",
+  "@giftForWomen": {
+    "description": "Gift type `women`."
+  },
+  "giftForCompanies": "For companies",
+  "@giftForCompanies": {
+    "description": "Gift type `companies` — companies and organizations."
+  },
+  "giftForMenTagline": "Gifts he'll love",
+  "@giftForMenTagline": {
+    "description": "Home Shop-for tile, under For him."
+  },
+  "giftForWomenTagline": "Gifts she'll love",
+  "@giftForWomenTagline": {
+    "description": "Home Shop-for tile, under For her."
+  },
+  "giftForCompaniesTagline": "Corporate & team gifts",
+  "@giftForCompaniesTagline": {
+    "description": "Home Shop-for tile, under For companies."
+  },
+  "shopForTitle": "Shop for",
+  "@shopForTitle": {
+    "description": "Home section title above the For him / For her / For companies tiles."
+  },
+  "reels": "Reels",
+  "@reels": {
+    "description": "Bottom navigation tab and page title of the product videos (SRS §5.27)."
+  },
+  "reelsFilterTitle": "Filter reels",
+  "@reelsFilterTitle": {
+    "description": "Title of the Reels filter sheet."
+  },
+  "reelsCategory": "Category",
+  "@reelsCategory": {
+    "description": "Reels filter sheet section."
+  },
+  "reelsShowResults": "Show reels",
+  "@reelsShowResults": {
+    "description": "Apply button of the Reels filter sheet."
+  },
+  "reelsShopNow": "Shop now",
+  "@reelsShopNow": {
+    "description": "Gold button on a reel's product card."
+  },
+  "reelsEmptyTitle": "No reels yet",
+  "@reelsEmptyTitle": {
+    "description": "Reels tab with no reels at all."
+  },
+  "reelsEmptyBody": "Fresh gift videos are on their way.",
+  "reelsNoMatchTitle": "No reels match these filters",
+  "reelsNoMatchBody": "Try another category, price or gift type.",
+  "reelsClearFilters": "Clear filters",
+  "reelsSoundOn": "Turn sound on",
+  "@reelsSoundOn": {
+    "description": "Tooltip of the muted sound button."
+  },
+  "reelsSoundOff": "Turn sound off",
+  "@reelsSoundOff": {
+    "description": "Tooltip of the sound button while sound is on."
+  },
+  "reelsPlay": "Play",
+  "reelsPause": "Pause",
+  "reelsVideoError": "This video can't be played",
+  "reelsRemoveFilter": "Remove filter",
+  "@reelsRemoveFilter": {
+    "description": "Tooltip of the ✕ on an active-filter chip."
+  },
+  "reelsMore": "more",
+  "@reelsMore": {
+    "description": "Shown after a truncated caption; tapping expands it."
+  },
+  "reelsViewProduct": "View {product}",
+  "@reelsViewProduct": {
+    "description": "Screen-reader label of a reel's product card.",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  }
+}

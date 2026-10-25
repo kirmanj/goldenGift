@@ -1,0 +1,234 @@
+# iOS release build (SRS §10 Phase 10) — docs/RELEASE.md.
+#
+# Tag `vX.Y.Z` (must match mobile/pubspec.yaml) or run it by hand.
+#  - With the signing secrets (distribution certificate + App Store provisioning
+#    profile) it builds a signed IPA, kept as a workflow artifact, and — when the
+#    App Store Connect API key secrets exist too — uploads it to TestFlight.
+#  - Without them it builds an unsigned archive (`--no-codesign`) to prove the
+#    build still works.
+# The committed Xcode project keeps Automatic signing; the job switches the
+# Runner target to Manual signing in the runner's checkout only.
+name: Release · iOS
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'CFBundleVersion override (empty = BUILD_NUMBER_OFFSET + run number)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-ios-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.38.7' # keep in step with ci.yml
+
+jobs:
+  ios:
+    name: IPA → TestFlight
+    # Xcode 26 / iOS 26 SDK is required for App Store uploads.
+    runs-on: macos-26
+    timeout-minutes: 75
+    env:
+      HAS_SIGNING: ${{ secrets.IOS_DIST_CERT_P12_B64 != '' && secrets.IOS_DIST_CERT_PASSWORD != '' && secrets.IOS_PROVISIONING_PROFILE_B64 != '' }}
+      HAS_ASC: ${{ secrets.APPSTORE_ISSUER_ID != '' && secrets.APPSTORE_API_KEY_ID != '' && secrets.APPSTORE_API_PRIVATE_KEY != '' }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v6.1.0
+
+      - name: Select Xcode
+        env:
+          XCODE_VERSION: ${{ vars.XCODE_VERSION }}
+        run: |
+          if [[ -n "$XCODE_VERSION" ]]; then
+            sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app"
+          fi
+          xcodebuild -version
+
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # The Runner target has a "FlutterFire: flutterfire upload-crashlytics-symbols"
+      # build phase (Crashlytics dSYMs); the archive fails without the CLI.
+      - name: FlutterFire CLI
+        run: |
+          dart pub global activate flutterfire_cli 1.4.1
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Version and build number
+        id: version
+        env:
+          BUILD_NUMBER_OVERRIDE: ${{ inputs.build_number }}
+          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: bash ../.github/scripts/release_build_info.sh pubspec.yaml
+
+      - name: Firebase config (git-ignored files from secrets)
+        env:
+          FIREBASE_OPTIONS_DART_B64: ${{ secrets.FIREBASE_OPTIONS_DART_B64 }}
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
+        run: bash ../.github/scripts/write_firebase_config.sh . dart ios
+
+      - name: Dart defines
+        env:
+          MAPS_ENABLED: ${{ vars.MAPS_ENABLED == 'true' && secrets.IOS_MAPS_API_KEY != '' }}
+          DART_DEFINES_JSON: ${{ secrets.DART_DEFINES_JSON }}
+        run: bash ../.github/scripts/write_dart_defines.sh "$RUNNER_TEMP/dart_defines.json"
+
+      # Info.plist reads GMSApiKey from the MAPS_API_KEY build setting. Written to
+      # the runner's copy of Release.xcconfig only — never committed.
+      - name: Google Maps key (build setting)
+        env:
+          IOS_MAPS_API_KEY: ${{ secrets.IOS_MAPS_API_KEY }}
+        run: |
+          if [[ -n "$IOS_MAPS_API_KEY" ]]; then
+            printf '\nMAPS_API_KEY=%s\n' "$IOS_MAPS_API_KEY" >> ios/Flutter/Release.xcconfig
+            echo "MAPS_API_KEY build setting added"
+          else
+            echo "No IOS_MAPS_API_KEY — the map pin stays off"
+          fi
+
+      - run: flutter pub get
+      - run: flutter gen-l10n
+
+      - name: Import the distribution certificate
+        if: env.HAS_SIGNING == 'true'
+        uses: apple-actions/import-codesign-certs@v7.0.0
+        with:
+          p12-file-base64: ${{ secrets.IOS_DIST_CERT_P12_B64 }}
+          p12-password: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+
+      - name: Install the provisioning profile, switch to manual signing
+        if: env.HAS_SIGNING == 'true'
+        env:
+          IOS_PROVISIONING_PROFILE_B64: ${{ secrets.IOS_PROVISIONING_PROFILE_B64 }}
+        run: |
+          profile="$RUNNER_TEMP/golden_gift.mobileprovision"
+          printf '%s' "$IOS_PROVISIONING_PROFILE_B64" | tr -d ' \r\n' | base64 --decode > "$profile"
+          security cms -D -i "$profile" > "$RUNNER_TEMP/profile.plist"
+          pb() { /usr/libexec/PlistBuddy -c "Print :$1" "$RUNNER_TEMP/profile.plist"; }
+          uuid="$(pb UUID)"
+          name="$(pb Name)"
+          team="$(pb TeamIdentifier:0)"
+          app_id="$(pb Entitlements:application-identifier)"
+          if [[ "$app_id" != "$team.com.goldengift.goldenGift" ]]; then
+            echo "::error::The provisioning profile is for '$app_id', expected '$team.com.goldengift.goldenGift' (App Store distribution)."
+            exit 1
+          fi
+          # Xcode 16+ reads profiles from UserData; older tools from MobileDevice.
+          for dir in "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" "$HOME/Library/MobileDevice/Provisioning Profiles"; do
+            mkdir -p "$dir"
+            cp "$profile" "$dir/$uuid.mobileprovision"
+          done
+          ruby -e "require 'xcodeproj'" 2> /dev/null || gem install xcodeproj --no-document
+          ruby ../.github/scripts/ios_manual_signing.rb ios/Runner.xcodeproj "$team" "$name"
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>export</string>
+            <key>teamID</key><string>$team</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.goldengift.goldenGift</key><string>$uuid</string>
+            </dict>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          PLIST
+          plutil -lint "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Build signed IPA
+        if: env.HAS_SIGNING == 'true'
+        env:
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+        run: >-
+          flutter build ipa --release
+          --build-number="$BUILD_NUMBER"
+          --export-options-plist="$RUNNER_TEMP/ExportOptions.plist"
+          --dart-define-from-file="$RUNNER_TEMP/dart_defines.json"
+
+      - name: Build unsigned archive (no signing secrets)
+        if: env.HAS_SIGNING != 'true'
+        env:
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+        run: |
+          echo "::warning::iOS signing secrets are not set — building an unsigned archive only (no IPA, no TestFlight)."
+          flutter build ipa --release --no-codesign \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define-from-file="$RUNNER_TEMP/dart_defines.json"
+
+      - name: Locate the IPA
+        id: ipa
+        if: env.HAS_SIGNING == 'true'
+        run: |
+          ipa="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' | head -n 1)"
+          [[ -n "$ipa" ]] || { echo "::error::no IPA in build/ios/ipa"; exit 1; }
+          echo "path=mobile/$ipa" >> "$GITHUB_OUTPUT"
+          echo "IPA: $ipa"
+
+      - uses: actions/upload-artifact@v7.0.1
+        if: env.HAS_SIGNING == 'true'
+        with:
+          name: golden-gift-ios-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.build_number }}
+          path: ${{ steps.ipa.outputs.path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload to TestFlight
+        if: env.HAS_SIGNING == 'true' && env.HAS_ASC == 'true'
+        uses: apple-actions/upload-testflight-build@v5.3.0
+        with:
+          app-path: ${{ steps.ipa.outputs.path }}
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          # HTTPS only (exempt encryption) — answers the export-compliance question.
+          uses-non-exempt-encryption: 'false'
+          # Waiting for processing burns macOS minutes; TestFlight emails when it is ready.
+          wait-for-processing: 'false'
+
+      - name: Remove signing files
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/golden_gift.mobileprovision" "$RUNNER_TEMP/profile.plist" "$RUNNER_TEMP/ExportOptions.plist"
+          rm -f "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/"*.mobileprovision
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/"*.mobileprovision
+
+      - name: Summary
+        if: always()
+        working-directory: .
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+        run: |
+          {
+            echo "### Golden Gift iOS ${VERSION_NAME:-?} (${BUILD_NUMBER:-?})"
+            if [[ "$HAS_SIGNING" == 'true' ]]; then
+              echo "- Signed IPA built (artifact)"
+              if [[ "$HAS_ASC" == 'true' ]]; then
+                echo "- TestFlight: uploaded (processing takes a few minutes; Apple emails when ready)"
+              else
+                echo "- TestFlight: skipped (needs APPSTORE_ISSUER_ID, APPSTORE_API_KEY_ID, APPSTORE_API_PRIVATE_KEY)"
+              fi
+            else
+              echo "- **Unsigned** archive only (needs IOS_DIST_CERT_P12_B64, IOS_DIST_CERT_PASSWORD, IOS_PROVISIONING_PROFILE_B64)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

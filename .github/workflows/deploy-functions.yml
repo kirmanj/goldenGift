@@ -1,0 +1,110 @@
+# Cloud Functions + Firestore indexes deploy (SRS §7, §10 Phase 10) — docs/RELEASE.md.
+#
+# Manual only. Builds and tests the functions (unit + emulator / security-rules
+# suites), then deploys `functions` and `firestore:indexes`. With
+# `deploy_rules: true` it also deploys the PRODUCTION Firestore + Storage rules:
+# the job copies mobile/firestore.production.rules → mobile/firestore.rules and
+# mobile/storage.production.rules → mobile/storage.rules in the runner's checkout
+# (the paths firebase.json deploys) — nothing is ever committed back.
+#
+# Needs the Blaze plan, the FIREBASE_SERVICE_ACCOUNT secret and every function
+# secret already in Secret Manager (OTPIQ_API_KEY, ALGOLIA_ADMIN_KEY, ZAINCASH_SECRET).
+# Non-secret params (ENFORCE_APP_CHECK, ALGOLIA_APP_ID, GEMINI_MODEL, ZAINCASH_*)
+# come from the committed mobile/functions/.env.
+name: Deploy · Functions
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_rules:
+        description: 'Also deploy the PRODUCTION Firestore + Storage rules (replaces the dev-mode rules)'
+        type: boolean
+        default: false
+      force:
+        description: 'Pass --force: deletes deployed functions / indexes that are no longer in the source'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-functions
+  cancel-in-progress: false
+
+jobs:
+  functions:
+    name: Test + deploy functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HAS_FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+      DEPLOY_RULES: ${{ inputs.deploy_rules }}
+      FORCE: ${{ inputs.force }}
+    steps:
+      - uses: actions/checkout@v6.1.0
+
+      - uses: actions/setup-java@v5.7.0
+        with:
+          distribution: temurin
+          java-version: '21' # firebase-tools 15 emulators
+
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: mobile/functions/package-lock.json
+
+      - name: Build + unit tests
+        working-directory: mobile/functions
+        run: |
+          npm ci
+          npm run build
+          npm run typecheck
+          npm test
+
+      - run: npm install -g firebase-tools@15
+
+      - name: Emulator suites (functions + security rules)
+        run: >-
+          firebase emulators:exec --only auth,firestore,storage --project goldengift-iq
+          "npm --prefix mobile/functions test"
+
+      - name: Use the production rules (runner checkout only)
+        if: env.DEPLOY_RULES == 'true'
+        run: |
+          cp mobile/firestore.production.rules mobile/firestore.rules
+          cp mobile/storage.production.rules mobile/storage.rules
+          echo "::notice::Deploying the PRODUCTION Firestore + Storage rules."
+          git status --short mobile/firestore.rules mobile/storage.rules
+
+      - name: Authenticate to Google Cloud
+        if: env.HAS_FIREBASE_SA == 'true'
+        uses: google-github-actions/auth@v3.0.0
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy
+        if: env.HAS_FIREBASE_SA == 'true'
+        run: |
+          only="functions,firestore:indexes"
+          [[ "$DEPLOY_RULES" == 'true' ]] && only="$only,firestore:rules,storage"
+          args=(deploy --only "$only" --project goldengift-iq --non-interactive
+            --message "GitHub Actions ${GITHUB_REF_NAME} #${GITHUB_RUN_NUMBER}")
+          [[ "$FORCE" == 'true' ]] && args+=(--force)
+          echo "firebase ${args[*]}"
+          firebase "${args[@]}"
+
+      - name: Deploy skipped
+        if: env.HAS_FIREBASE_SA != 'true'
+        run: echo "::notice::FIREBASE_SERVICE_ACCOUNT is not set — tested only, nothing deployed (docs/RELEASE.md)."
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Golden Gift functions deploy"
+            echo "- Deployed: $([[ "$HAS_FIREBASE_SA" == 'true' ]] && echo 'functions, firestore:indexes' || echo 'nothing (no FIREBASE_SERVICE_ACCOUNT)')"
+            echo "- Production rules: $([[ "$DEPLOY_RULES" == 'true' && "$HAS_FIREBASE_SA" == 'true' ]] && echo '**deployed** (Firestore + Storage)' || echo 'not deployed')"
+            echo "- App Check enforcement: ENFORCE_APP_CHECK=$(sed -n 's/^ENFORCE_APP_CHECK=//p' mobile/functions/.env) (mobile/functions/.env)"
+          } >> "$GITHUB_STEP_SUMMARY"

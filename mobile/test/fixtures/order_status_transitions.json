@@ -1,0 +1,16 @@
+{
+  "_comment": "OrderStatusX.flow / allowedNext (mobile/lib/models/order_model.dart) and ALLOWED_NEXT / ORDER_FLOW (mobile/functions/src/orders/orderTransitions.ts). Checked by test/models/order_status_transitions_fixture_test.dart and functions/test/orderTransitions.test.ts — change both sides together.",
+  "flow": ["pending", "confirmed", "preparing", "readyForDelivery", "outForDelivery", "delivered"],
+  "allowedNext": {
+    "pending": ["confirmed", "cancelledBySeller"],
+    "confirmed": ["preparing", "cancelledBySeller"],
+    "preparing": ["readyForDelivery", "cancelledBySeller"],
+    "readyForDelivery": ["outForDelivery", "cancelledBySeller"],
+    "outForDelivery": ["delivered", "returned"],
+    "delivered": ["returned", "refunded"],
+    "returned": ["refunded"],
+    "cancelledByBuyer": ["refunded"],
+    "cancelledBySeller": ["refunded"],
+    "refunded": []
+  }
+}

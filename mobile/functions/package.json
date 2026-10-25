@@ -1,0 +1,41 @@
+{
+  "name": "golden-gift-functions",
+  "version": "1.0.0",
+  "description": "Cloud Functions and dev data seeder for Golden Gift (SRS §7).",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.dev.json --noEmit",
+    "test": "tsx --test test/*.test.ts && tsx --test test/rules/*.test.ts",
+    "serve": "npm run build && cd ../.. && firebase emulators:start --only functions,firestore,auth,storage",
+    "seed:emulator": "tsx scripts/seed.ts --target=emulator",
+    "seed:dev": "tsx scripts/seed.ts --target=dev",
+    "algolia:setup": "tsx scripts/algolia-setup.ts",
+    "algolia:reindex": "tsx scripts/algolia-reindex.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "icons:categories": "tsx scripts/upload-category-icons.ts",
+    "auth:enable-email": "tsx scripts/enable-email-auth.ts --target=dev",
+    "maintenance:backfill-product-ids": "tsx scripts/backfill-order-product-ids.ts",
+    "maintenance:backfill-gift-for": "tsx scripts/backfill-gift-for.ts"
+  },
+  "dependencies": {
+    "@google/genai": "2.27.0",
+    "algoliasearch": "^5.59.0",
+    "firebase-admin": "^13.10.0",
+    "firebase-functions": "^6.6.0",
+    "libphonenumber-js": "^1.13.15"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "@types/node": "^20.19.43",
+    "firebase": "^12.19.0",
+    "google-auth-library": "^10.9.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

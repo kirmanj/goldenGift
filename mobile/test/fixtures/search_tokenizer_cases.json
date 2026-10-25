@@ -1,0 +1,22 @@
+{
+  "_comment": "Shared by test/core/search_tokenizer_test.dart and functions/test/searchTokenizer.test.ts. Both tokenizers must produce exactly these outputs.",
+  "tokenize": [
+    { "input": "Personalized Wooden Frame", "output": ["personalized", "wooden", "frame"] },
+    { "input": "  Mug & Coaster — Set!  ", "output": ["mug", "coaster", "set"] },
+    { "input": "3D Name Lamp, 3D lamp", "output": ["3d", "name", "lamp"] },
+    { "input": "A b cd", "output": ["cd"] },
+    { "input": "إطار صور خشبي", "output": ["اطار", "صور", "خشبی"] },
+    { "input": "هَدِيَّة مُخَصَّصَة", "output": ["هدیة", "مخصصة"] },
+    { "input": "كوب قهوة", "output": ["کوب", "قهوة"] },
+    { "input": "دیاری تایبەت", "output": ["دیاری", "تایبەت"] },
+    { "input": "مـــوبايل", "output": ["موبایل"] },
+    { "input": "Frame فریم چوارچێوە", "output": ["frame", "فریم", "چوارچێوە"] },
+    { "input": "", "output": [] }
+  ],
+  "keywords": [
+    {
+      "input": ["Engraved Pen", "قلم محفور", "پێنووسی هەڵکۆڵراو", "pen", "gift"],
+      "output": ["engraved", "pen", "قلم", "محفور", "پێنووسی", "هەڵکۆڵراو", "gift"]
+    }
+  ]
+}

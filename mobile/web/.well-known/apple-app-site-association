@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.goldengift.goldenGift"],
+        "components": [
+          { "/": "/p/*", "comment": "product share links (SRS §4.6)" },
+          { "/": "/r/*", "comment": "referral links" },
+          { "/": "/s/*", "comment": "Secret Santa invites" }
+        ],
+        "appID": "TEAMID.com.goldengift.goldenGift",
+        "paths": ["/p/*", "/r/*", "/s/*"]
+      }
+    ]
+  }
+}

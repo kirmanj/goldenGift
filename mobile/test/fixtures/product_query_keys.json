@@ -1,0 +1,434 @@
+{
+  "_comment": "Shared by test/features/products/product_query_test.dart and functions/test/productDerived.test.ts (+ reelDerived.test.ts for reelKeys). The app builds queries with these keys; onProductWrite / onReelWrite / the seeder / the dashboard write them. SRS §5.8, §5.8a, §6.4, §6.4a.",
+  "priceBandBounds": [
+    25000,
+    50000,
+    100000,
+    200000
+  ],
+  "priceBand": [
+    {
+      "price": 0,
+      "band": 0
+    },
+    {
+      "price": 24999,
+      "band": 0
+    },
+    {
+      "price": 25000,
+      "band": 1
+    },
+    {
+      "price": 49999,
+      "band": 1
+    },
+    {
+      "price": 50000,
+      "band": 2
+    },
+    {
+      "price": 99999,
+      "band": 2
+    },
+    {
+      "price": 100000,
+      "band": 3
+    },
+    {
+      "price": 199999,
+      "band": 3
+    },
+    {
+      "price": 200000,
+      "band": 4
+    },
+    {
+      "price": 950000,
+      "band": 4
+    }
+  ],
+  "derived": [
+    {
+      "input": {
+        "price": 35000,
+        "compareAtPrice": 40000,
+        "categoryIds": [
+          "frames",
+          "love"
+        ],
+        "availableCities": [],
+        "giftFor": [
+          "men",
+          "women"
+        ]
+      },
+      "output": {
+        "hasDiscount": true,
+        "priceBand": 1,
+        "cityKeys": [
+          "all"
+        ],
+        "catCityKeys": [
+          "frames|all",
+          "love|all"
+        ],
+        "forKeys": [
+          "men",
+          "men|cat:frames",
+          "men|cat:love",
+          "men|city:all",
+          "men|cat:frames|city:all",
+          "men|cat:love|city:all",
+          "women",
+          "women|cat:frames",
+          "women|cat:love",
+          "women|city:all",
+          "women|cat:frames|city:all",
+          "women|cat:love|city:all"
+        ]
+      }
+    },
+    {
+      "input": {
+        "price": 30000,
+        "compareAtPrice": null,
+        "categoryIds": [
+          "breakfast"
+        ],
+        "availableCities": [
+          "erbil",
+          "duhok"
+        ],
+        "giftFor": [
+          "women"
+        ]
+      },
+      "output": {
+        "hasDiscount": false,
+        "priceBand": 1,
+        "cityKeys": [
+          "erbil",
+          "duhok"
+        ],
+        "catCityKeys": [
+          "breakfast|erbil",
+          "breakfast|duhok"
+        ],
+        "forKeys": [
+          "women",
+          "women|cat:breakfast",
+          "women|city:erbil",
+          "women|city:duhok",
+          "women|cat:breakfast|city:erbil",
+          "women|cat:breakfast|city:duhok"
+        ]
+      }
+    },
+    {
+      "input": {
+        "price": 40000,
+        "compareAtPrice": 40000,
+        "categoryIds": [],
+        "availableCities": [
+          "erbil"
+        ],
+        "giftFor": []
+      },
+      "output": {
+        "hasDiscount": false,
+        "priceBand": 1,
+        "cityKeys": [
+          "erbil"
+        ],
+        "catCityKeys": [],
+        "forKeys": []
+      }
+    },
+    {
+      "input": {
+        "price": 250000,
+        "compareAtPrice": 300000,
+        "categoryIds": [
+          "jewelry-and-watches"
+        ],
+        "availableCities": [],
+        "giftFor": [
+          "women",
+          "companies"
+        ]
+      },
+      "output": {
+        "hasDiscount": true,
+        "priceBand": 4,
+        "cityKeys": [
+          "all"
+        ],
+        "catCityKeys": [
+          "jewelry-and-watches|all"
+        ],
+        "forKeys": [
+          "women",
+          "women|cat:jewelry-and-watches",
+          "women|city:all",
+          "women|cat:jewelry-and-watches|city:all",
+          "companies",
+          "companies|cat:jewelry-and-watches",
+          "companies|city:all",
+          "companies|cat:jewelry-and-watches|city:all"
+        ]
+      }
+    },
+    {
+      "input": {
+        "price": 12000,
+        "categoryIds": [
+          "mugs"
+        ],
+        "availableCities": [
+          "erbil"
+        ],
+        "giftFor": [
+          "companies",
+          "nobody",
+          "companies"
+        ]
+      },
+      "output": {
+        "hasDiscount": false,
+        "priceBand": 0,
+        "cityKeys": [
+          "erbil"
+        ],
+        "catCityKeys": [
+          "mugs|erbil"
+        ],
+        "forKeys": [
+          "companies",
+          "companies|cat:mugs",
+          "companies|city:erbil",
+          "companies|cat:mugs|city:erbil"
+        ]
+      }
+    }
+  ],
+  "queryKeys": [
+    {
+      "category": "frames",
+      "city": "erbil",
+      "cityAnyOf": [
+        "erbil",
+        "all"
+      ],
+      "catCityAnyOf": [
+        "frames|erbil",
+        "frames|all"
+      ]
+    }
+  ],
+  "forQueryKeys": [
+    {
+      "audience": "men",
+      "forAnyOf": [
+        "men"
+      ]
+    },
+    {
+      "audience": "women",
+      "category": "frames",
+      "forAnyOf": [
+        "women|cat:frames"
+      ]
+    },
+    {
+      "audience": "companies",
+      "city": "erbil",
+      "forAnyOf": [
+        "companies|city:erbil",
+        "companies|city:all"
+      ]
+    },
+    {
+      "audience": "men",
+      "category": "mugs",
+      "city": "duhok",
+      "forAnyOf": [
+        "men|cat:mugs|city:duhok",
+        "men|cat:mugs|city:all"
+      ]
+    }
+  ],
+  "reelKeys": {
+    "filterKey": [
+      {
+        "category": "mugs",
+        "filterKey": "cat:mugs"
+      },
+      {
+        "audience": "women",
+        "filterKey": "for:women"
+      },
+      {
+        "category": "frames",
+        "audience": "companies",
+        "filterKey": "cat:frames|for:companies"
+      },
+      {
+        "filterKey": null
+      }
+    ],
+    "derived": [
+      {
+        "reel": {
+          "isActive": true
+        },
+        "product": {
+          "title": "Gold Mug",
+          "titleAr": "كوب ذهبي",
+          "storeId": "golden-gift-home",
+          "images": [
+            "https://img/1.jpg",
+            "https://img/2.jpg"
+          ],
+          "price": 30000,
+          "compareAtPrice": 35000,
+          "categoryIds": [
+            "mugs",
+            "love"
+          ],
+          "giftFor": [
+            "men",
+            "women"
+          ],
+          "isActive": true
+        },
+        "output": {
+          "storeId": "golden-gift-home",
+          "product": {
+            "title": "Gold Mug",
+            "titleAr": "كوب ذهبي",
+            "image": "https://img/1.jpg",
+            "price": 30000,
+            "compareAtPrice": 35000,
+            "isActive": true
+          },
+          "categoryIds": [
+            "mugs",
+            "love"
+          ],
+          "giftFor": [
+            "men",
+            "women"
+          ],
+          "priceBand": 1,
+          "filterKeys": [
+            "cat:mugs",
+            "cat:love",
+            "for:men",
+            "for:women",
+            "cat:mugs|for:men",
+            "cat:mugs|for:women",
+            "cat:love|for:men",
+            "cat:love|for:women"
+          ],
+          "visible": true
+        }
+      },
+      {
+        "reel": {
+          "isActive": false
+        },
+        "product": {
+          "title": "Pen Set",
+          "titleKu": "پێنووس",
+          "storeId": "s1",
+          "images": [],
+          "price": 250000,
+          "categoryIds": [
+            "engraving"
+          ],
+          "giftFor": [
+            "companies"
+          ],
+          "isActive": true
+        },
+        "output": {
+          "storeId": "s1",
+          "product": {
+            "title": "Pen Set",
+            "titleKu": "پێنووس",
+            "image": null,
+            "price": 250000,
+            "compareAtPrice": null,
+            "isActive": true
+          },
+          "categoryIds": [
+            "engraving"
+          ],
+          "giftFor": [
+            "companies"
+          ],
+          "priceBand": 4,
+          "filterKeys": [
+            "cat:engraving",
+            "for:companies",
+            "cat:engraving|for:companies"
+          ],
+          "visible": false
+        }
+      },
+      {
+        "reel": {
+          "isActive": true
+        },
+        "product": {
+          "title": "Old Frame",
+          "storeId": "s2",
+          "images": [
+            "https://img/f.jpg"
+          ],
+          "price": 45000,
+          "categoryIds": [
+            "frames"
+          ],
+          "giftFor": [],
+          "isActive": false
+        },
+        "output": {
+          "storeId": "s2",
+          "product": {
+            "title": "Old Frame",
+            "image": "https://img/f.jpg",
+            "price": 45000,
+            "compareAtPrice": null,
+            "isActive": false
+          },
+          "categoryIds": [
+            "frames"
+          ],
+          "giftFor": [],
+          "priceBand": 1,
+          "filterKeys": [
+            "cat:frames"
+          ],
+          "visible": false
+        }
+      },
+      {
+        "reel": {
+          "isActive": true
+        },
+        "product": null,
+        "output": {
+          "storeId": "",
+          "product": null,
+          "categoryIds": [],
+          "giftFor": [],
+          "priceBand": 0,
+          "filterKeys": [],
+          "visible": false
+        }
+      }
+    ]
+  }
+}

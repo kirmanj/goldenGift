@@ -1,0 +1,109 @@
+name: golden_gift
+description: Golden Gift — Personalized Gifts Marketplace for Iraq & Kurdistan
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.10.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management (Riverpod)
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Firebase
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.12
+  firebase_storage: ^12.4.10
+  firebase_messaging: ^15.2.10
+  firebase_analytics: ^11.6.0
+  firebase_crashlytics: ^4.3.10
+  cloud_functions: ^5.6.2
+  firebase_app_check: ^0.3.2+10
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Networking / Local Storage
+  http: ^1.6.0
+  shared_preferences: ^2.5.5
+
+  # UI
+  cached_network_image: ^3.4.1
+  image_picker: ^1.2.3
+  image_cropper: ^8.1.0
+  shimmer: ^3.0.0
+  carousel_slider: ^5.1.2
+  smooth_page_indicator: ^1.2.1
+  flutter_svg: ^2.3.0
+  lottie: ^3.3.3
+  google_maps_flutter: ^2.18.1
+
+  # Utilities
+  intl: ^0.20.2
+  uuid: ^4.6.0
+  google_sign_in: ^6.3.0
+  sign_in_with_apple: ^6.1.4
+  timeago: ^3.7.1
+  json_annotation: ^4.9.0
+  share_plus: ^10.1.4
+  url_launcher: ^6.3.2
+  package_info_plus: ^8.3.1
+  cupertino_icons: ^1.0.9
+  video_player: ^2.11.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+  build_runner: ^2.5.4
+  json_serializable: ^6.9.5
+  riverpod_generator: ^2.6.5
+  fake_cloud_firestore: ^3.1.0
+  video_player_platform_interface: ^6.9.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: ../branding/app-icons/ios/AppIcon-1024.png
+  adaptive_icon_foreground: ../branding/app-icons/android/ic_launcher_foreground.png
+  adaptive_icon_background: "#0E0E0F"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: ../branding/web/icon-512.png
+    background_color: "#0E0E0F"
+    theme_color: "#C9A227"
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+        - asset: assets/fonts/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-Bold.ttf
+          weight: 700
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
+        - asset: assets/fonts/Vazirmatn-Bold.ttf
+          weight: 700
+
+  assets:
+    - assets/images/
+    - assets/lang/

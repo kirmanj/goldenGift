@@ -1,0 +1,18 @@
+# Android release (upload key) signing — docs/RELEASE.md.
+# Copy to mobile/android/key.properties (git-ignored) and fill in. Never commit the
+# real file or the keystore. Without it, release builds use the debug key (fine for
+# `flutter run --release`, rejected by Google Play).
+#
+# Create the upload keystore once (keep it + the passwords in the owner's password
+# manager; Play App Signing holds the real app signing key):
+#   keytool -genkeypair -v -keystore ~/keys/goldengift-upload.jks -storetype JKS \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# storeFile: absolute path, or relative to mobile/android/app/.
+storeFile=/Users/you/keys/goldengift-upload.jks
+storePassword=CHANGE_ME
+keyAlias=upload
+keyPassword=CHANGE_ME
+#
+# CI uses environment variables instead (release-android.yml):
+#   ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD

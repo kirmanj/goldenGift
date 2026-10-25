@@ -1,0 +1,75 @@
+{
+  "_comment": "Checkout delivery rules (SRS §5.11). Checked by mobile/test/features/checkout/checkout_rules_fixture_test.dart (CheckoutRules) AND mobile/functions/test/checkoutRules.test.ts (placeOrder) — both must pass. Every `now` is Iraq wall-clock time (Asia/Baghdad, UTC+3, no DST); dates are yyyy-MM-dd. `slots: null` = DeliverySlot.defaults.",
+  "defaultSlots": [
+    { "id": "morning", "from": "10:00", "to": "14:00" },
+    { "id": "afternoon", "from": "14:00", "to": "18:00" },
+    { "id": "evening", "from": "18:00", "to": "22:00" }
+  ],
+  "earliestDeliveryDate": [
+    { "now": "2026-10-21T09:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2026-10-21" },
+    { "now": "2026-10-21T00:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2026-10-21" },
+    { "now": "2026-10-21T13:59", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2026-10-21" },
+    { "now": "2026-10-21T14:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T23:59", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T10:00", "sameDayCutoff": "14:00", "maxPreparationDays": 2, "earliest": "2026-10-23" },
+    { "now": "2026-10-21T15:30", "sameDayCutoff": "14:00", "maxPreparationDays": 2, "earliest": "2026-10-24" },
+    { "now": "2026-10-21T10:00", "sameDayCutoff": "14:00", "maxPreparationDays": 12, "earliest": "2026-11-02" },
+    { "now": "2026-10-31T15:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2026-11-01" },
+    { "now": "2026-12-31T16:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2027-01-01" },
+    { "now": "2026-12-30T10:00", "sameDayCutoff": "14:00", "maxPreparationDays": 3, "earliest": "2027-01-02" },
+    { "now": "2028-02-28T15:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2028-02-29" },
+    { "now": "2027-02-28T15:00", "sameDayCutoff": "14:00", "maxPreparationDays": 0, "earliest": "2027-03-01" },
+    { "now": "2026-10-21T08:59", "sameDayCutoff": "9:00", "maxPreparationDays": 0, "earliest": "2026-10-21" },
+    { "now": "2026-10-21T09:00", "sameDayCutoff": "9:00", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T12:29", "sameDayCutoff": " 12:30 ", "maxPreparationDays": 0, "earliest": "2026-10-21" },
+    { "now": "2026-10-21T12:30", "sameDayCutoff": " 12:30 ", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T00:00", "sameDayCutoff": "00:00", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T13:00", "sameDayCutoff": "25:00", "maxPreparationDays": 0, "earliest": "2026-10-21" },
+    { "now": "2026-10-21T14:00", "sameDayCutoff": "25:00", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T14:30", "sameDayCutoff": "14:60", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T15:00", "sameDayCutoff": "", "maxPreparationDays": 0, "earliest": "2026-10-22" },
+    { "now": "2026-10-21T15:00", "sameDayCutoff": "2pm", "maxPreparationDays": 1, "earliest": "2026-10-23" }
+  ],
+  "availableSlots": [
+    { "date": "2026-10-21", "now": "2026-10-21T09:59", "slots": null, "available": ["morning", "afternoon", "evening"] },
+    { "date": "2026-10-21", "now": "2026-10-21T10:00", "slots": null, "available": ["afternoon", "evening"] },
+    { "date": "2026-10-21", "now": "2026-10-21T13:59", "slots": null, "available": ["afternoon", "evening"] },
+    { "date": "2026-10-21", "now": "2026-10-21T14:00", "slots": null, "available": ["evening"] },
+    { "date": "2026-10-21", "now": "2026-10-21T17:59", "slots": null, "available": ["evening"] },
+    { "date": "2026-10-21", "now": "2026-10-21T18:00", "slots": null, "available": [] },
+    { "date": "2026-10-22", "now": "2026-10-21T23:00", "slots": null, "available": ["morning", "afternoon", "evening"] },
+    { "date": "2026-11-03", "now": "2026-10-21T12:00", "slots": null, "available": ["morning", "afternoon", "evening"] },
+    { "date": "2026-10-20", "now": "2026-10-21T12:00", "slots": null, "available": ["morning", "afternoon", "evening"] },
+    {
+      "date": "2026-10-21",
+      "now": "2026-10-21T12:00",
+      "slots": [
+        { "id": "early", "from": "08:00", "to": "10:00" },
+        { "id": "late", "from": "20:30", "to": "23:00" },
+        { "id": "broken", "from": "soon", "to": "later" }
+      ],
+      "available": ["late"]
+    },
+    {
+      "date": "2026-10-22",
+      "now": "2026-10-21T12:00",
+      "slots": [
+        { "id": "early", "from": "08:00", "to": "10:00" },
+        { "id": "late", "from": "20:30", "to": "23:00" },
+        { "id": "broken", "from": "soon", "to": "later" }
+      ],
+      "available": ["early", "late", "broken"]
+    },
+    {
+      "date": "2026-10-21",
+      "now": "2026-10-21T20:29",
+      "slots": [{ "id": "late", "from": "20:30", "to": "23:00" }, { "id": "nine", "from": "9:00", "to": "12:00" }],
+      "available": ["late"]
+    }
+  ],
+  "deliveryDates": [
+    { "earliest": "2026-10-21", "count": 14, "last": "2026-11-03" },
+    { "earliest": "2026-12-25", "count": 14, "last": "2027-01-07" },
+    { "earliest": "2028-02-20", "count": 14, "last": "2028-03-04" }
+  ]
+}

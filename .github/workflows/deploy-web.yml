@@ -1,0 +1,122 @@
+# Web deploys to Firebase Hosting (SRS §2.2) — docs/RELEASE.md.
+#
+#   goldengift-admin  ← adminDashboard/build/web  (admin dashboard)
+#   goldengift-iq     ← mobile/build/web          (customer web app + /privacy, /terms,
+#                                                  /.well-known/* for app links)
+#
+# Builds always run (they prove the web builds); the deploy is skipped with a
+# notice when the FIREBASE_SERVICE_ACCOUNT secret is missing.
+name: Deploy · Web
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Which site(s) to build and deploy'
+        type: choice
+        options: [both, admin, customer]
+        default: both
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.38.7' # keep in step with ci.yml
+
+jobs:
+  web:
+    name: Build + deploy hosting
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HAS_FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+      BUILD_ADMIN: ${{ github.event_name != 'workflow_dispatch' || inputs.target != 'customer' }}
+      BUILD_CUSTOMER: ${{ github.event_name != 'workflow_dispatch' || inputs.target != 'admin' }}
+    steps:
+      - uses: actions/checkout@v6.1.0
+
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # App Check on the web (both apps) needs the reCAPTCHA Enterprise site key;
+      # without it the web apps run without App Check (fine until enforcement).
+      - name: Dart defines (web)
+        env:
+          RECAPTCHA_SITE_KEY: ${{ vars.RECAPTCHA_SITE_KEY || secrets.RECAPTCHA_SITE_KEY }}
+        run: bash .github/scripts/write_dart_defines.sh "$RUNNER_TEMP/dart_defines_web.json"
+
+      - name: Customer web app — Firebase config
+        if: env.BUILD_CUSTOMER == 'true'
+        env:
+          FIREBASE_OPTIONS_DART_B64: ${{ secrets.FIREBASE_OPTIONS_DART_B64 }}
+        run: bash .github/scripts/write_firebase_config.sh mobile dart
+
+      - name: Customer web app — build
+        if: env.BUILD_CUSTOMER == 'true'
+        working-directory: mobile
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          flutter build web --release --dart-define-from-file="$RUNNER_TEMP/dart_defines_web.json"
+          for page in privacy.html terms.html .well-known/assetlinks.json .well-known/apple-app-site-association; do
+            test -f "build/web/$page" || { echo "::error::build/web/$page is missing"; exit 1; }
+          done
+
+      - name: Admin dashboard — Firebase config
+        if: env.BUILD_ADMIN == 'true'
+        env:
+          # The dashboard's own web config; falls back to the app's file (same web app).
+          FIREBASE_OPTIONS_DART_B64: ${{ secrets.ADMIN_FIREBASE_OPTIONS_DART_B64 || secrets.FIREBASE_OPTIONS_DART_B64 }}
+        run: bash .github/scripts/write_firebase_config.sh adminDashboard dart
+
+      - name: Admin dashboard — build
+        if: env.BUILD_ADMIN == 'true'
+        working-directory: adminDashboard
+        run: |
+          flutter pub get
+          flutter build web --release --dart-define-from-file="$RUNNER_TEMP/dart_defines_web.json"
+
+      - uses: actions/upload-artifact@v7.0.1
+        with:
+          name: golden-gift-web-${{ github.run_number }}
+          path: |
+            mobile/build/web
+            adminDashboard/build/web
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Authenticate to Google Cloud
+        if: env.HAS_FIREBASE_SA == 'true'
+        uses: google-github-actions/auth@v3.0.0
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - uses: actions/setup-node@v6.4.0
+        if: env.HAS_FIREBASE_SA == 'true'
+        with:
+          node-version: '20'
+
+      - name: Deploy to Firebase Hosting
+        if: env.HAS_FIREBASE_SA == 'true'
+        run: |
+          only=()
+          [[ "$BUILD_ADMIN" == 'true' ]] && only+=("hosting:goldengift-admin")
+          [[ "$BUILD_CUSTOMER" == 'true' ]] && only+=("hosting:goldengift-iq")
+          targets="$(IFS=,; echo "${only[*]}")"
+          echo "Deploying $targets"
+          npx --yes firebase-tools@15 deploy --only "$targets" --project goldengift-iq \
+            --non-interactive --message "GitHub Actions ${GITHUB_REF_NAME} #${GITHUB_RUN_NUMBER}"
+
+      - name: Deploy skipped
+        if: env.HAS_FIREBASE_SA != 'true'
+        run: echo "::notice::FIREBASE_SERVICE_ACCOUNT is not set — built only, nothing deployed (docs/RELEASE.md)."
